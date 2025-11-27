@@ -7,13 +7,12 @@ import json
 # -----------------------------
 def get_conn():
     return psycopg2.connect(
-        host="localhost",
-        dbname="pjt",
-        user="ssafyuser",
-        password="ssafy"   
+        host="postgres",          # DOCKER DB SERVICE NAME
+        dbname="paper_db",        # docker-compose.yml 에 설정한 DB
+        user="postgres",
+        password="postgres",
+        port=5432
     )
-
-
 # -----------------------------
 # Abstract 변환 함수
 # -----------------------------

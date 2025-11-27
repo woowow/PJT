@@ -2,7 +2,7 @@ from api_call import pipeline
 import requests, time
 
 def fetch_level1():
-    url = "https://api.openalex.org/concepts?filter=level:1&per-page=200"
+    url = "https://api.openalex.org/concepts?filter=level:1&per-page=50"
     res = []
     while url:
         data = requests.get(url).json()
@@ -11,8 +11,8 @@ def fetch_level1():
     return res
 
 
-def fetch_works_by_category(cid, limit=1000):
-    url = f"https://api.openalex.org/works?filter=concepts.id:{cid}&per-page=200&sort=publication_date:desc"
+def fetch_works_by_category(cid, limit=50):
+    url = f"https://api.openalex.org/works?filter=concepts.id:{cid}&per-page=50&sort=publication_date:desc"
     papers = []
     while url and len(papers) < limit:
         data = requests.get(url).json()
