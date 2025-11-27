@@ -85,26 +85,49 @@ def insert_category(conn, level1):
 # institution에 넣기
 def insert_institution(conn, inst):
 
-    # inst가 None인 경우 기관 정보 없음
+    # inst 자체가 None이면 기관 없음 → None 리턴
     if not inst:
         return None
-    
-    # alex_id = inst["id"].split("/")[-1].replace("I", "")
+
+    # ---------------------------------------------------
+    # ⭐ 방어코드 1: inst["id"]가 None / '' / 존재하지 않을 경우 대비
+    # ---------------------------------------------------
+    alex_inst_raw = inst.get("id")
+
+    alex_institution_id = None
+    if alex_inst_raw and isinstance(alex_inst_raw, str) and "openalex.org" in alex_inst_raw:
+        # 예: https://openalex.org/I123456789 → I123456789 → 123456789
+        try:
+            alex_institution_id = alex_inst_raw.split("/")[-1].replace("I", "")
+        except:
+            alex_institution_id = None  # split 오류 방지
+    # else:
+    #   alex_institution_id는 None으로 그대로 둠 (DB에 NULL 저장됨)
+
+    # ---------------------------------------------------
+    # 기관명, 국가코드 추출
+    # ---------------------------------------------------
     name = inst.get("display_name")
     country = inst.get("country_code")
 
+    # ---------------------------------------------------
+    # ⭐ INSERT에 alex_institution_id 포함
+    #    id가 None이라도 DB에는 NULL 저장 가능
+    # ---------------------------------------------------
     sql = """
-    INSERT INTO institution (institution_name, country_code)
-    VALUES (%s, %s)
-    RETURNING institution_id;
+        INSERT INTO institution (institution_name, country_code, alex_institution_id)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (alex_institution_id) DO UPDATE
+        SET institution_name = EXCLUDED.institution_name,
+            country_code = EXCLUDED.country_code
+        RETURNING institution_id;
     """
-    # sql이 만든 institution_id를 new_id로 python이 받음
+
     with conn.cursor() as cur:
-        cur.execute(sql, (name, country))
+        cur.execute(sql, (name, country, alex_institution_id))
         new_id = cur.fetchone()[0]
         conn.commit()
         return new_id
-
 
 
 # author table 넣기
@@ -212,7 +235,7 @@ def insert_year_citation(conn, paper_id, work):
     y3 = counts[2]["cited_by_count"] if len(counts) > 2 else 0
 
     sql = """
-    INSERT INTO year_citation (paper_id, recent_year1_count, recent_year2_count, recent_year3_count)
+    INSERT INTO yearcitation (paper_id, recent_year1_count, recent_year2_count, recent_year3_count)
     VALUES (%s, %s, %s, %s)
     ON CONFLICT (paper_id) DO UPDATE
     SET recent_year1_count = EXCLUDED.recent_year1_count,
@@ -227,7 +250,7 @@ def insert_year_citation(conn, paper_id, work):
 
 def insert_author_paper(conn, paper_id, author_id):
     sql = """
-    INSERT INTO author_paper (paper_id, author_id)
+    INSERT INTO authorpaper (paper_id, author_id)
     VALUES (%s, %s)
     ON CONFLICT DO NOTHING;
     """
