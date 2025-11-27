@@ -1,6 +1,8 @@
 import requests
 import time
 
+
+
 def fetch_level2_concepts():
     url = "https://api.openalex.org/concepts"
     params = {
@@ -8,7 +10,6 @@ def fetch_level2_concepts():
         "per-page": 200,   # 한 번에 최대 가져오기
         "page": 1
     }
-
 
     display_names = set()
 
