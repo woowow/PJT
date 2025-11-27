@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS guestcategorycount(
   guest_id INTEGER NOT NULL,
   category_id INTEGER NOT NULL,
   count INTEGER DEFAULT 0,
+  UNIQUE(guest_id, category_id),
   FOREIGN KEY (guest_id) REFERENCES guest(guest_id),
   FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
