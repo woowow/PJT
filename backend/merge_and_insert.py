@@ -1,71 +1,132 @@
 import os
 import json
+import time
 import psycopg2
 from psycopg2.extras import execute_batch
 
-DATA_DIR = "./data"
-
+# ===============================
+# DB CONFIG
+# ===============================
 DB_CONFIG = {
-    "dbname": "paper_db",
-    "user": "postgres",
-    "password": "postgres",
-    "host": "postgres",
-    "port": "5432"
+    "dbname": os.getenv("DB_NAME", "paper_db"),
+    "user": os.getenv("DB_USER", "postgres"),
+    "password": os.getenv("DB_PASSWORD", "postgres"),
+    "host": os.getenv("DB_HOST", "postgres"),
+    "port": os.getenv("DB_PORT", "5432"),
 }
 
-def load_json_files(prefix):
-    items = []
-    for file in os.listdir(DATA_DIR):
-        if file.startswith(prefix) and file.endswith(".json"):
-            with open(os.path.join(DATA_DIR, file), "r", encoding="utf-8") as f:
-                items.extend(json.load(f))
-    return items
+DATA_DIR = "./data"
 
-
+# ===============================
+# PostgreSQL 연결 (재시도 포함)
+# ===============================
 def connect():
-    return psycopg2.connect(**DB_CONFIG)
+    for i in range(20):
+        try:
+            return psycopg2.connect(**DB_CONFIG)
+        except Exception:
+            print(f"⏳ DB 대기 중... ({i+1}/20)")
+            time.sleep(2)
+    raise Exception("❌ PostgreSQL 연결 실패")
 
 
+# ===============================
+# JSON 로드
+# ===============================
+def load_json(filename):
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-# =========================================================
-# INSERT FUNCTIONS
-# =========================================================
 
-def insert_categories(cur, items):
+# ===============================
+# INSERT CATEGORY
+# ===============================
+def insert_category(cur, items):
+    if not items:
+        return
+
+    print("📁 카테고리 처리...")
+
     sql = """
-        INSERT INTO category (category_name, alex_category_id)
-        VALUES (%s, %s)
+        INSERT INTO category (category_id, category_name, alex_category_id)
+        VALUES (%s, %s, %s)
         ON CONFLICT (alex_category_id) DO UPDATE
         SET category_name = EXCLUDED.category_name;
     """
-    data = [(i["category_name"], i["alex_category_id"]) for i in items]
+
+    data = [(c["category_id"], c["category_name"], c["alex_category_id"]) for c in items]
     execute_batch(cur, sql, data)
 
 
+# ===============================
+# INSERT INSTITUTION
+# ===============================
+def insert_institution(cur, items):
+    if not items:
+        return
 
-def insert_institutions(cur, items):
+    print("🏢 기관 처리...")
+
     sql = """
-        INSERT INTO institution (institution_name, country_code, alex_institution_id)
-        VALUES (%s, %s, %s)
+        INSERT INTO institution (institution_id, institution_name, country_code, alex_institution_id)
+        VALUES (%s, %s, %s, %s)
         ON CONFLICT (alex_institution_id) DO UPDATE
         SET institution_name = EXCLUDED.institution_name,
             country_code = EXCLUDED.country_code;
     """
-    data = [(i["institution_name"], i["country_code"], i["alex_institution_id"]) for i in items]
+
+    data = [
+        (i["institution_id"], i["institution_name"], i["country_code"], i["alex_institution_id"])
+        for i in items
+    ]
     execute_batch(cur, sql, data)
 
 
+# ===============================
+# 도우미: alex_id → 내부 PK 변환
+# ===============================
+def get_category_id(cur, alex_id):
+    cur.execute("SELECT category_id FROM category WHERE alex_category_id=%s", (alex_id,))
+    row = cur.fetchone()
+    return row[0] if row else None
 
-def insert_authors(cur, items):
+def get_institution_id(cur, alex_id):
+    cur.execute("SELECT institution_id FROM institution WHERE alex_institution_id=%s", (alex_id,))
+    row = cur.fetchone()
+    return row[0] if row else None
+
+def get_author_id(cur, alex_id):
+    cur.execute("SELECT author_id FROM author WHERE alex_author_id=%s", (alex_id,))
+    row = cur.fetchone()
+    return row[0] if row else None
+
+def get_paper_id(cur, alex_paper_id):
+    cur.execute("SELECT paper_id FROM paper WHERE alex_paper_id=%s", (alex_paper_id,))
+    row = cur.fetchone()
+    return row[0] if row else None
+
+def get_guest_id(cur, guestname):
+    cur.execute("SELECT guest_id FROM guest WHERE guestname=%s", (guestname,))
+    row = cur.fetchone()
+    return row[0] if row else None
+
+
+# ===============================
+# INSERT AUTHOR
+# ===============================
+def insert_author(cur, items):
+    if not items:
+        return
+
+    print("👤 저자 처리...")
+
     sql = """
-        INSERT INTO author 
-        (author_name, alex_author_id, institution_id,
-         citation_total, main_topic_1, main_topic_2, main_topic_3)
-        VALUES (
-            %s, %s,
-            (SELECT institution_id FROM institution WHERE alex_institution_id = %s),
-            %s, %s, %s, %s
-        )
+        INSERT INTO author (author_id, author_name, alex_author_id,
+                            institution_id, citation_total, main_topic_1, main_topic_2, main_topic_3)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (alex_author_id) DO UPDATE
         SET author_name = EXCLUDED.author_name,
             institution_id = EXCLUDED.institution_id,
@@ -77,27 +138,34 @@ def insert_authors(cur, items):
 
     data = [
         (
-            a["author_name"], a["alex_author_id"], a["institution_alex_id"],
-            a.get("citation_total", 0),
-            a.get("main_topic_1"), a.get("main_topic_2"), a.get("main_topic_3")
+            a.get("author_id"),
+            a["author_name"],
+            a["alex_author_id"],
+            a.get("institution_id"),
+            a.get("citation_total", None),
+            a.get("main_topic_1"),
+            a.get("main_topic_2"),
+            a.get("main_topic_3"),
         )
         for a in items
     ]
     execute_batch(cur, sql, data)
 
 
+# ===============================
+# INSERT PAPER (abstract + yearcitation 포함)
+# ===============================
+def insert_paper(cur, items):
+    if not items:
+        return
 
-def insert_papers(cur, items):
-    sql = """
-        INSERT INTO paper 
-        (title, category_id, institution_id, citation, open_access,
-         locations, announcement_date, submit, alex_paper_id)
-        VALUES (
-            %s,
-            (SELECT category_id FROM category WHERE alex_category_id = %s),
-            (SELECT institution_id FROM institution WHERE alex_institution_id = %s),
-            %s, %s, %s, %s, %s, %s
-        )
+    print("📄 논문 처리...")
+
+    sql_paper = """
+        INSERT INTO paper (title, category_id, institution_id, citation,
+                           open_access, locations, announcement_date, submit,
+                           alex_paper_id)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON CONFLICT (alex_paper_id) DO UPDATE
         SET title = EXCLUDED.title,
             category_id = EXCLUDED.category_id,
@@ -109,182 +177,198 @@ def insert_papers(cur, items):
             submit = EXCLUDED.submit;
     """
 
-    data = [
-        (
-            p["title"], p["category_alex_id"], p["institution_alex_id"],
-            p.get("citation", 0),
-            p.get("open_access", False),
-            p.get("locations"),
-            p.get("announcement_date"),
-            p.get("submit"),
-            p["alex_paper_id"]
+    for p in items:
+        category_id = get_category_id(cur, p["category_alex_id"]) if p.get("category_alex_id") else None
+        institution_id = get_institution_id(cur, p["institution_alex_id"]) if p.get("institution_alex_id") else None
+
+        execute_batch(
+            cur,
+            sql_paper,
+            [
+                (
+                    p["title"],
+                    category_id,
+                    institution_id,
+                    p.get("citation", None),
+                    p.get("open_access", False),
+                    p.get("locations"),
+                    p.get("announcement_date"),
+                    p.get("submit"),
+                    p["alex_paper_id"],
+                )
+            ],
         )
-        for p in items
-    ]
 
-    execute_batch(cur, sql, data)
+        # -------------------
+        # ABSTRACT 저장
+        # -------------------
+        if p.get("abstract"):
+            pid = get_paper_id(cur, p["alex_paper_id"])
 
+            cur.execute(
+                """
+                INSERT INTO abstract (paper_id, context)
+                VALUES (%s, %s)
+                ON CONFLICT (paper_id) DO UPDATE
+                SET context = EXCLUDED.context;
+            """,
+                (pid, p["abstract"]),
+            )
 
+        # -------------------
+        # YEAR-CITATION 저장
+        # -------------------
+        if p.get("cited_by_year"):
+            pid = get_paper_id(cur, p["alex_paper_id"])
+            y = sorted(p["cited_by_year"], key=lambda x: -x["year"])
 
-def insert_abstract(cur, items):
-    sql = """
-        INSERT INTO abstract (paper_id, context)
-        VALUES (
-            (SELECT paper_id FROM paper WHERE alex_paper_id = %s),
-            %s
-        )
-        ON CONFLICT (paper_id) DO UPDATE
-        SET context = EXCLUDED.context;
-    """
+            counts = [y[i]["count"] if i < len(y) else 0 for i in range(3)]
 
-    data = [
-        (p["alex_paper_id"], p.get("abstract", None))
-        for p in items if "abstract" in p
-    ]
-    execute_batch(cur, sql, data)
-
-
-
-def insert_yearcitation(cur, items):
-    sql = """
-        INSERT INTO yearcitation
-        (paper_id, recent_year1_count, recent_year2_count, recent_year3_count)
-        VALUES (
-            (SELECT paper_id FROM paper WHERE alex_paper_id = %s),
-            %s, %s, %s
-        )
-        ON CONFLICT (paper_id) DO UPDATE
-        SET recent_year1_count = EXCLUDED.recent_year1_count,
-            recent_year2_count = EXCLUDED.recent_year2_count,
-            recent_year3_count = EXCLUDED.recent_year3_count;
-    """
-
-    def extract_year_counts(cited):
-        if not cited:
-            return (0, 0, 0)
-
-        cited_sorted = sorted(cited, key=lambda x: x["year"], reverse=True)
-        counts = [cited_sorted[i]["count"] if i < len(cited_sorted) else 0 for i in range(3)]
-        return counts[0], counts[1], counts[2]
-
-    data = [
-        (p["alex_paper_id"], *extract_year_counts(p.get("cited_by_year")))
-        for p in items
-    ]
-
-    execute_batch(cur, sql, data)
+            cur.execute(
+                """
+                INSERT INTO yearcitation (paper_id, recent_year1_count, recent_year2_count, recent_year3_count)
+                VALUES (%s,%s,%s,%s)
+                ON CONFLICT (paper_id) DO UPDATE
+                SET recent_year1_count = EXCLUDED.recent_year1_count,
+                    recent_year2_count = EXCLUDED.recent_year2_count,
+                    recent_year3_count = EXCLUDED.recent_year3_count;
+            """,
+                (pid, counts[0], counts[1], counts[2]),
+            )
 
 
-
+# ===============================
+# INSERT AUTHOR–PAPER RELATION
+# ===============================
 def insert_authorpaper(cur, items):
+    if not items:
+        return
+
+    print("🔗 저자-논문 관계 처리...")
+
     sql = """
         INSERT INTO authorpaper (paper_id, author_id)
-        VALUES (
-            (SELECT paper_id FROM paper WHERE alex_paper_id = %s),
-            (SELECT author_id FROM author WHERE alex_author_id = %s)
-        )
-        ON CONFLICT DO NOTHING;
+        VALUES (%s, %s)
+        ON CONFLICT (paper_id, author_id) DO NOTHING;
     """
-    data = [(a["alex_paper_id"], a["alex_author_id"]) for a in items]
+
+    data = []
+    for rel in items:
+        pid = get_paper_id(cur, rel["alex_paper_id"])
+        aid = get_author_id(cur, rel["alex_author_id"])
+        if pid and aid:
+            data.append((pid, aid))
+
     execute_batch(cur, sql, data)
 
 
-
+# ===============================
+# INSERT GUEST
+# ===============================
 def insert_guest(cur, items):
+    if not items:
+        return
+
+    print("👥 GUEST 처리...")
+
     sql = """
-        INSERT INTO guest (guestname, pwd, interest_1, interest_2, interest_3)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO guest (guest_id, guestname, pwd, interest_1, interest_2, interest_3)
+        VALUES (%s,%s,%s,%s,%s,%s)
         ON CONFLICT (guestname) DO UPDATE
         SET pwd = EXCLUDED.pwd,
             interest_1 = EXCLUDED.interest_1,
             interest_2 = EXCLUDED.interest_2,
             interest_3 = EXCLUDED.interest_3;
     """
+
     data = [
-        (g["guestname"], g["pwd"], g.get("interest_1"), g.get("interest_2"), g.get("interest_3"))
+        (
+            g.get("guest_id"),
+            g["guestname"],
+            g["pwd"],
+            g.get("interest_1"),
+            g.get("interest_2"),
+            g.get("interest_3"),
+        )
         for g in items
     ]
     execute_batch(cur, sql, data)
 
 
-
+# ===============================
+# INSERT GUEST FAVORITE
+# ===============================
 def insert_guestfavorite(cur, items):
+    if not items:
+        return
+
+    print("⭐ GUEST FAVORITE 처리...")
+
     sql = """
         INSERT INTO guestfavorite (guest_id, paper_id)
-        VALUES (
-            (SELECT guest_id FROM guest WHERE guestname = %s),
-            (SELECT paper_id FROM paper WHERE alex_paper_id = %s)
-        )
-        ON CONFLICT DO NOTHING;
+        VALUES (%s, %s)
+        ON CONFLICT (guest_id, paper_id) DO NOTHING;
     """
-    data = [(g["guestname"], g["alex_paper_id"]) for g in items]
+
+    data = []
+    for f in items:
+        gid = get_guest_id(cur, f["guestname"])
+        pid = get_paper_id(cur, f["alex_paper_id"])
+        if gid and pid:
+            data.append((gid, pid))
+
     execute_batch(cur, sql, data)
 
 
+# ===============================
+# INSERT GUEST CATEGORY COUNT
+# ===============================
+def insert_guestcategory(cur, items):
+    if not items:
+        return
 
-def insert_guestcategorycount(cur, items):
+    print("📊 GUEST CATEGORY COUNT 처리...")
+
     sql = """
         INSERT INTO guestcategorycount (guest_id, category_id, count)
-        VALUES (
-            (SELECT guest_id FROM guest WHERE guestname = %s),
-            (SELECT category_id FROM category WHERE alex_category_id = %s),
-            %s
-        )
+        VALUES (%s, %s, %s)
         ON CONFLICT (guest_id, category_id) DO UPDATE
         SET count = EXCLUDED.count;
     """
-    data = [(g["guestname"], g["alex_category_id"], g["count"]) for g in items]
+
+    data = []
+    for c in items:
+        gid = get_guest_id(cur, c["guestname"])
+        cid = get_category_id(cur, c["alex_category_id"])
+        if gid and cid:
+            data.append((gid, cid, c.get("count", 0)))
+
     execute_batch(cur, sql, data)
 
 
-
-# =========================================================
+# ===============================
 # MAIN
-# =========================================================
-
+# ===============================
 def main():
-    print("🔄 JSON 데이터 → PostgreSQL 자동 병합 시작")
+    print("🔄 JSON → PostgreSQL 병합 시작")
 
     conn = connect()
     cur = conn.cursor()
 
-    categories = load_json_files("categories_")
-    institutions = load_json_files("institutions_")
-    authors = load_json_files("authors_")
-    papers = load_json_files("papers_")
-    relations = load_json_files("authorpaper_")
-
-    guests = load_json_files("guest_")
-    guestfav = load_json_files("guestfavorite_")
-    guestcc = load_json_files("guestcategorycount_")
-
-    print(f"📁 카테고리: {len(categories)}개")
-    print(f"📁 기관: {len(institutions)}개")
-    print(f"📁 저자: {len(authors)}개")
-    print(f"📁 논문: {len(papers)}개")
-    print(f"📁 관계: {len(relations)}개")
-    print(f"📁 guest: {len(guests)}개")
-    print(f"📁 즐겨찾기: {len(guestfav)}개")
-    print(f"📁 guest-category-count: {len(guestcc)}개")
-
-    insert_categories(cur, categories)
-    insert_institutions(cur, institutions)
-    insert_authors(cur, authors)
-    insert_papers(cur, papers)
-    insert_abstract(cur, papers)
-    insert_yearcitation(cur, papers)
-    insert_authorpaper(cur, relations)
-
-    insert_guest(cur, guests)
-    insert_guestfavorite(cur, guestfav)
-    insert_guestcategorycount(cur, guestcc)
+    insert_category(cur, load_json("category.json"))
+    insert_institution(cur, load_json("institution.json"))
+    insert_author(cur, load_json("author.json"))
+    insert_paper(cur, load_json("paper.json"))
+    insert_authorpaper(cur, load_json("authorpaper.json"))
+    insert_guest(cur, load_json("guest.json"))
+    insert_guestfavorite(cur, load_json("guestfavorite.json"))
+    insert_guestcategory(cur, load_json("guestcategorycount.json"))
 
     conn.commit()
     cur.close()
     conn.close()
 
-    print("✅ DB 최신 업데이트 완료")
-
+    print("🎉 DB 최신화 완료!")
 
 
 if __name__ == "__main__":
