@@ -13,6 +13,8 @@ def get_conn():
         password="postgres",
         port=5432
     )
+
+
 # -----------------------------
 # Abstract 변환 함수
 # -----------------------------
@@ -257,6 +259,20 @@ def insert_author_paper(conn, paper_id, author_id):
         cur.execute(sql, (paper_id, author_id))
         conn.commit()
 
+def get_best_level1_concept(concepts):
+    if not concepts:
+        return None
+    
+    # level1만 모으기
+    level1 = [c for c in concepts if c.get("level") == 1]
+
+    if not level1:
+        return None
+
+    # score 기준으로 가장 높은 concept 선택
+    best = max(level1, key=lambda c: c.get("score", 0))
+    return best
+
 
 # -----------------------------
 # 🚀 전체 파이프라인 실행
@@ -269,19 +285,13 @@ def pipeline(work_id):
         return
     
     
+    # -----------------------------
     # 1) 카테고리(level 1)
-    concept = next((c for c in work["concepts"] if c["level"] == 1), None)
-
-    # 1) 카테고리(level 1)
-    concepts = work.get("concepts")
-
-    if not concepts:
-        concept = None
-    else:
-        concept = next((c for c in concepts if c and c.get("level") == 1), None)
-
-    # category_id는 반드시 여기서 공통적으로 처리해야 함
+    # -----------------------------
+    concepts = work.get("concepts", [])
+    concept = get_best_level1_concept(concepts)
     category_id = insert_category(conn, concept) if concept else None
+
 
 
     # 2) institutions (first author institution)

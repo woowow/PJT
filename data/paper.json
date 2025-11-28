@@ -1,0 +1,54 @@
+[
+  {
+    "title": "Deep Learning for Time Series",
+    "alex_paper_id": "W123456",
+    "category_alex_id": "C101",
+    "institution_alex_id": "I3000",
+    "citation": 150,
+    "open_access": true,
+    "locations": "https://example.com/paper1",
+    "announcement_date": "2023-10-02",
+    "submit": "arXiv",
+    "abstract": "This paper proposes a novel approach to time-series forecasting using deep learning techniques.",
+    "cited_by_year": [
+      {
+        "year": 2023,
+        "count": 50
+      },
+      {
+        "year": 2022,
+        "count": 30
+      },
+      {
+        "year": 2021,
+        "count": 20
+      }
+    ]
+  },
+  {
+    "title": "A Survey on Computer Vision Models",
+    "alex_paper_id": "W654321",
+    "category_alex_id": "C102",
+    "institution_alex_id": "I3001",
+    "citation": 280,
+    "open_access": false,
+    "locations": "https://example.com/paper2",
+    "announcement_date": "2022-08-20",
+    "submit": "IEEE",
+    "abstract": "Comprehensive survey on modern CV models and architectures.",
+    "cited_by_year": [
+      {
+        "year": 2023,
+        "count": 80
+      },
+      {
+        "year": 2022,
+        "count": 110
+      },
+      {
+        "year": 2021,
+        "count": 60
+      }
+    ]
+  }
+]
