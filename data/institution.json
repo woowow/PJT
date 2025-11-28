@@ -1,0 +1,15 @@
+
+[
+  {
+    "institution_id": 1,
+    "institution_name": "MIT",
+    "country_code": "US",
+    "alex_institution_id": "I3000"
+  },
+  {
+    "institution_id": 2,
+    "institution_name": "Stanford University",
+    "country_code": "US",
+    "alex_institution_id": "I3001"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "category_id": 1,
+    "category_name": "Machine Learning",
+    "alex_category_id": "C101"
+  },
+  {
+    "category_id": 2,
+    "category_name": "Computer Vision",
+    "alex_category_id": "C102"
+  }
+]

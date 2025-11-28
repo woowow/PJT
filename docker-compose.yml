@@ -40,5 +40,16 @@ services:
     ports:
       - "5173:5173"
 
+  cron:
+    image: curlimages/curl:latest
+    container_name: paper_cron
+    user: root
+    depends_on:
+      - backend
+    entrypoint: >
+      sh -c "echo '0 0 * * 0 curl -X POST http://backend:8000/api/reset-weekly/' > /etc/crontabs/root
+      && crond -f -d 8"
+
+
 volumes:
   pgdata:

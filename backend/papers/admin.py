@@ -4,7 +4,7 @@ from .models import Paper
 @admin.register(Paper)
 class PaperAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "paper_id",
         "title",
         "category",
         "institution",
