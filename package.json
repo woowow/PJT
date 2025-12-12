@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/vue3": "^6.1.19",
     "axios": "^1.13.2"
   }
 }
