@@ -10,6 +10,13 @@ import SearchResultView from "@/views/SearchResultView.vue";
 import PaperDetailView from "@/views/PaperDetailView.vue";
 import MyPageView from "@/views/MyPageView.vue";
 import AuthorView from "@/views/AuthorView.vue";
+import RecommendView from "@/views/RecommendView.vue";   // ★ 추가
+import TrendView from "@/views/TrendView.vue";
+
+// ⭐ 연구 활동 (캘린더)
+import ActivityCalendarView from "@/views/ActivityCalendarView.vue";
+
+import ReadingBoardView from "@/views/ReadingBoardView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,7 +34,7 @@ const router = createRouter({
       component: RegisterView,
     },
 
-    // 로그인 이후는 모두 MainLayout 안에서 렌더링
+    // 로그인 이후 모든 화면은 MainLayout 안에서 렌더링
     {
       path: "/",
       component: MainLayout,
@@ -59,6 +66,26 @@ const router = createRouter({
           name: "author",
           component: AuthorView,
           props: true,
+        },
+        {
+          path: "recommend",               // ★ 추가
+          name: "recommend",
+          component: RecommendView,
+        },
+        {
+          path: "trend",
+          name: "trend",
+          component: TrendView,
+        },
+        {
+          path: "activity",
+          name: "activity",
+          component: ActivityCalendarView,
+        },
+        {
+          path: "reading",
+          name: "reading",
+          component: ReadingBoardView,
         },
       ],
     },

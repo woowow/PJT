@@ -14,6 +14,8 @@
         <router-link to="/trend" class="nav-item">트렌드</router-link>
         <router-link to="/recommend" class="nav-item">추천</router-link>
         <router-link to="/mypage" class="nav-item">마이페이지</router-link>
+        <router-link to="/activity" class="nav-item">연구달력</router-link>
+        <router-link to="/reading" class="nav-item">연구현황</router-link>
       </nav>
 
       <!-- 오른쪽: 로그아웃 -->
