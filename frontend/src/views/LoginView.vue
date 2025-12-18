@@ -53,17 +53,30 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";   // 추가!
+import api from "@/api";
 
 const router = useRouter();
 const username = ref("");
 const password = ref("");
 
-const doLogin = () => {
+const doLogin = async () => {
   if (!username.value || !password.value) {
     alert("Please enter your ID and password.");
     return;
   }
-  // 로그인 이후 라우팅은 나중에 연결
+
+  try {
+    const res = await api.post("/auth/login/", {
+      username: username.value,
+      password: password.value,
+    });
+
+    // 로그인 성공
+    localStorage.setItem("guest_id", res.data.guest_id);
+    router.push("/home");
+  } catch (err) {
+    alert("아이디 또는 비밀번호가 틀렸습니다.");
+  }
 };
 
 const goRegister = () => {

@@ -1,173 +1,145 @@
-from datetime import datetime
-from django.db.models import Q, Count
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .models import Paper
+from django.http import JsonResponse
+from django.db import connection
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+# 회원가입
+@csrf_exempt
+def register(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    body = json.loads(request.body)
+    username = body.get("username")
+    password = body.get("password")
+
+    if not username or not password:
+        return JsonResponse({"error": "missing fields"}, status=400)
+
+    with connection.cursor() as cursor:
+        # 중복 체크
+        cursor.execute(
+            "SELECT 1 FROM guest WHERE guestname = %s",
+            [username]
+        )
+        if cursor.fetchone():
+            return JsonResponse({"error": "user exists"}, status=409)
+
+        # 저장
+        cursor.execute("""
+            INSERT INTO guest (guestname, pwd)
+            VALUES (%s, %s)
+        """, [username, password])
+
+    return JsonResponse({"message": "registered"})
+
+# 로그인
+@csrf_exempt
+def login(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    body = json.loads(request.body)
+    username = body.get("username")
+    password = body.get("password")
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT guest_id FROM guest
+            WHERE guestname = %s AND pwd = %s
+        """, [username, password])
+
+        row = cursor.fetchone()
+        if not row:
+            return JsonResponse({"error": "invalid credentials"}, status=401)
+
+    return JsonResponse({
+        "message": "login success",
+        "guest_id": row[0]
+    })
+
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-from .models import (
-    Paper, Category, Guest, GuestFavorite, GuestCategoryCount
-)
-from .serializers import (
-    PaperSerializer, PaperDetailSerializer, GuestFavoriteSerializer
-)
+# 🔹 논문 리스트
+def paper_list(request):
+    keyword = request.GET.get("keyword", "")
+    subject = request.GET.get("subject", "")
+    country = request.GET.get("country", "")
 
-# --------------------------------------------------------
-# 📌 1. 일반 검색 + 기준 검색 (최신순, 인용순)
-# --------------------------------------------------------
-@api_view(["GET"])
-def search_papers(request):
-    keyword = request.GET.get("q", "")
-    limit = int(request.GET.get("limit", 10))
+    conditions = []
+    params = []
 
-    # 기본 필터
-    qs = Paper.objects.filter(
-        Q(title__icontains=keyword) |
-        Q(submit__icontains=keyword)
-    )
+    if keyword:
+        conditions.append("p.title ILIKE %s")
+        params.append(f"%{keyword}%")
 
-    # 정렬 옵션
-    order = request.GET.get("order", "latest")  
-    if order == "latest":
-        qs = qs.order_by("-announcement_date")
-    elif order == "cited":
-        qs = qs.order_by("-citation")
+    if subject:
+        conditions.append("""
+            (
+              p.title ILIKE %s OR
+              a.author_name ILIKE %s OR
+              c.category_name ILIKE %s
+            )
+        """)
+        params.extend([f"%{subject}%"] * 3)
 
-    qs = qs[:limit]
-
-    return Response(PaperSerializer(qs, many=True).data)
-
-
-# --------------------------------------------------------
-# 📌 2. 상세 검색
-# --------------------------------------------------------
-@api_view(["GET"])
-def advanced_search(request):
-    qs = Paper.objects.all()
-
-    # 기간 조건
-    start = request.GET.get("start")
-    end = request.GET.get("end")
-    if start:
-        qs = qs.filter(announcement_date__gte=start)
-    if end:
-        qs = qs.filter(announcement_date__lte=end)
-
-    # category 조건
-    category_id = request.GET.get("category_id")
-    if category_id:
-        qs = qs.filter(category_id=category_id)
-
-    # 기관 국가코드
-    country = request.GET.get("country")
     if country:
-        qs = qs.filter(institution__country_code=country)
+        conditions.append("i.country_code = %s")
+        params.append(country)
 
-    # 오픈액세스
-    oa = request.GET.get("open_access")
-    if oa in ["true", "True", "1"]:
-        qs = qs.filter(open_access=True)
+    where_clause = ""
+    if conditions:
+        where_clause = "WHERE " + " AND ".join(conditions)
 
-    # 정렬 옵션
-    order = request.GET.get("order", "latest")
-    if order == "latest":
-        qs = qs.order_by("-announcement_date")
-    elif order == "cited":
-        qs = qs.order_by("-citation")
+    with connection.cursor() as cursor:
+        cursor.execute(f"""
+            SELECT DISTINCT
+                p.paper_id AS id,
+                p.title,
+                a.author_name AS author,
+                EXTRACT(YEAR FROM p.announcement_date) AS year,
+                p.citation,
+                i.institution_name AS institution
+            FROM paper p
+            LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
+            LEFT JOIN author a ON ap.author_id = a.author_id
+            LEFT JOIN institution i ON p.institution_id = i.institution_id
+            LEFT JOIN category c ON p.category_id = c.category_id
+            {where_clause}
+            ORDER BY p.citation DESC
+            LIMIT 100
+        """, params)
 
-    return Response(PaperSerializer(qs, many=True).data)
+        data = dictfetchall(cursor)
 
-
-# --------------------------------------------------------
-# 📌 3. 논문 상세 API
-# --------------------------------------------------------
-@api_view(["GET"])
-def paper_detail(request, pid):
-    try:
-        paper = Paper.objects.get(pk=pid)
-    except Paper.DoesNotExist:
-        return Response({"error": "Paper not found"}, status=404)
-
-    return Response(PaperDetailSerializer(paper).data)
-
-
-# --------------------------------------------------------
-# 📌 4. 주간 인기 논문
-# --------------------------------------------------------
-@api_view(["GET"])
-def weekly_popular_papers(request):
-    limit = int(request.GET.get("limit", 10))
-    qs = Paper.objects.order_by("-weekly_count")[:limit]
-    return Response(PaperSerializer(qs, many=True).data)
+    return JsonResponse(data, safe=False)
 
 
-# --------------------------------------------------------
-# 📌 5. 전체 인기 Category (트렌드)
-# --------------------------------------------------------
-@api_view(["GET"])
-def trending_categories(request):
-    qs = (
-        GuestCategoryCount.objects
-        .values("category_id")
-        .annotate(total=Sum("count"))
-        .order_by("-total")
-    )
+# 🔹 논문 상세
+def paper_detail(request, paper_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                p.paper_id AS id,
+                p.title,
+                a.author_name AS author,
+                EXTRACT(YEAR FROM p.announcement_date) AS year,
+                p.citation,
+                i.institution_name AS institution,
+                ab.context AS abstract
+            FROM paper p
+            LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
+            LEFT JOIN author a ON ap.author_id = a.author_id
+            LEFT JOIN institution i ON p.institution_id = i.institution_id
+            LEFT JOIN abstract ab ON p.paper_id = ab.paper_id
+            WHERE p.paper_id = %s
+        """, [paper_id])
 
-    return Response(qs)
+        row = dictfetchall(cursor)
+        if not row:
+            return JsonResponse({"error": "not found"}, status=404)
 
-
-# --------------------------------------------------------
-# 📌 6. Guest 관심주제 기반 추천
-# --------------------------------------------------------
-@api_view(["GET"])
-def recommend_by_guest(request, guest_id):
-    try:
-        guest = Guest.objects.get(pk=guest_id)
-    except Guest.DoesNotExist:
-        return Response({"error": "Guest not found"}, status=404)
-
-    interest_ids = []
-    for field in ["interest_1", "interest_2", "interest_3"]:
-        cid = getattr(guest, field, None)
-        if cid:
-            interest_ids.append(cid)
-
-    qs = Paper.objects.filter(category_id__in=interest_ids)
-
-    return Response(PaperSerializer(qs, many=True).data)
-
-
-# --------------------------------------------------------
-# 📌 7. Guest 즐겨찾기 목록
-# --------------------------------------------------------
-@api_view(["GET"])
-def guest_favorites(request, guest_id):
-    favs = GuestFavorite.objects.filter(guest_id=guest_id)
-    return Response(GuestFavoriteSerializer(favs, many=True).data)
-
-
-# --------------------------------------------------------
-# 📌 8. 즐겨찾기 추가/삭제
-# --------------------------------------------------------
-@api_view(["POST"])
-def toggle_favorite(request):
-    guest_id = request.data.get("guest_id")
-    paper_id = request.data.get("paper_id")
-
-    obj, created = GuestFavorite.objects.get_or_create(
-        guest_id=guest_id,
-        paper_id=paper_id
-    )
-
-    if not created:
-        obj.delete()
-        return Response({"status": "removed"})
-
-    return Response({"status": "added"})
-
-## Weekly_count reset
-
-@api_view(["POST"])
-def reset_weekly(request):
-    Paper.objects.update(weekly_count=0)
-    return Response({"status": "ok", "msg": "weekly_count reset"})
+    return JsonResponse(row[0])

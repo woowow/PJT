@@ -20,15 +20,16 @@
 
     <!-- 🔵 검색 조건 표시 -->
     <div class="query-info">
-      <p><strong>키워드:</strong> {{ query.keyword || "-" }}</p>
-      <p><strong>주제:</strong> {{ query.subject || "-" }}</p>
-      <p><strong>국가:</strong> {{ query.country || "-" }}</p>
+      <p><strong>키워드:</strong> {{ queryState.keyword || "-" }}</p>
+      <p><strong>주제:</strong> {{ queryState.subject || "-" }}</p>
+      <p><strong>국가:</strong> {{ queryState.country || "-" }}</p>
     </div>
 
     <hr />
 
-    <!-- 🔵 검색 결과 리스트 -->
-    <div v-if="paginatedPapers.length > 0" class="results">
+    <div v-if="loading">검색 중...</div>
+
+    <div v-else-if="paginatedPapers.length > 0" class="results">
       <PaperCard
         v-for="item in paginatedPapers"
         :key="item.id"
@@ -55,41 +56,40 @@
 
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
 import PaperCard from "@/components/PaperCard.vue";
-import ProfileIcon from "@/components/ProfileIcon.vue";
+import api from "@/api";
 
-/* -------------------------------
-    🔵 QUERY 파싱
--------------------------------- */
 const route = useRoute();
 const router = useRouter();
 
-const query = {
+/* -------------------------------
+   🔑 쿼리 상태 (안전 + 확장 가능)
+-------------------------------- */
+const queryState = computed(() => ({
   keyword: route.query.keyword || "",
   subject: route.query.subject || "",
   country: route.query.country || "",
-};
+}));
+
+const keywordInput = ref(queryState.value.keyword);
 
 /* -------------------------------
-    🔵 검색창 v-model
--------------------------------- */
-const keywordInput = ref(query.keyword);
-
-/* -------------------------------
-    🔵 더미 데이터 (나중에 백엔드 연결)
+   상태
 -------------------------------- */
 const papers = ref([]);
+const loading = ref(false);
 
 /* -------------------------------
-    🔵 페이지네이션
+   페이지네이션
 -------------------------------- */
 const page = ref(1);
 const pageSize = 10;
 
-const totalPages = computed(() => Math.ceil(papers.value.length / pageSize));
+const totalPages = computed(() =>
+  Math.ceil(papers.value.length / pageSize)
+);
 
 const paginatedPapers = computed(() => {
   const start = (page.value - 1) * pageSize;
@@ -97,43 +97,57 @@ const paginatedPapers = computed(() => {
 });
 
 /* -------------------------------
-    🔵 즐겨찾기 (localStorage 저장)
+   검색 API
 -------------------------------- */
-const bookmarks = ref(JSON.parse(localStorage.getItem("bookmarks") || "[]"));
-
-const isBookmarked = (id) => bookmarks.value.includes(id);
-
-const toggleBookmark = (id) => {
-  if (bookmarks.value.includes(id)) {
-    bookmarks.value = bookmarks.value.filter((x) => x !== id);
-  } else {
-    bookmarks.value.push(id);
+const fetchPapers = async () => {
+  if (!queryState.value.keyword &&
+      !queryState.value.subject &&
+      !queryState.value.country) {
+    papers.value = [];
+    return;
   }
-  localStorage.setItem("bookmarks", JSON.stringify(bookmarks.value));
+
+  loading.value = true;
+
+  try {
+    const res = await api.get("/papers/", {
+      params: {
+        keyword: queryState.value.keyword,
+        subject: queryState.value.subject,
+        country: queryState.value.country,
+      },
+    });
+
+    console.log("📦 search result:", res.data);
+    papers.value = res.data;
+    page.value = 1;
+  } catch (err) {
+    console.error(err);
+    papers.value = [];
+  } finally {
+    loading.value = false;
+  }
 };
 
+/* 최초 + 쿼리 변경 시 */
+onMounted(fetchPapers);
+watch(() => route.query, fetchPapers, { deep: true });
+
 /* -------------------------------
-    🔵 다시 검색 기능
+   다시 검색
 -------------------------------- */
 const searchAgain = () => {
   router.push({
     path: "/search",
-    query: { keyword: keywordInput.value }
+    query: {
+      keyword: keywordInput.value,
+      subject: queryState.value.subject,
+      country: queryState.value.country,
+    },
   });
 };
-
-/* -------------------------------
-    🔵 더미 데이터 로딩
--------------------------------- */
-onMounted(() => {
-  papers.value = [
-    { id: 1, title: "Dummy Paper for AI", author: "John Doe", year: 2023, citation: 42, institution: "MIT" },
-    { id: 2, title: "Another Example Paper", author: "Alice Johnson", year: 2021, citation: 15, institution: "Stanford" },
-    { id: 3, title: "Research Study Example", author: "Lee Seungwoo", year: 2022, citation: 88, institution: "KAIST" },
-    // 테스트 위해 10개 이상 넣어도 OK
-  ];
-});
 </script>
+
 
 
 

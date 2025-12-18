@@ -47,75 +47,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import PaperCard from "@/components/PaperCard.vue";
+import api from "@/api";
 
-/* ---------------------------------------
-   🔥 Hot Topic Data (나중에 API 연결)
-----------------------------------------*/
+/* 🔥 Hot Topics (일단 더미 유지) */
 const hotTopics = ref([
-  {
-    rank: 1,
-    name: "Generative AI & LLMs",
-    trend: "Trend ↗ +150% citations",
-    bg: "linear-gradient(135deg, #ffe1df, #fce4bd)"
-  },
-  {
-    rank: 2,
-    name: "Climate Change Modeling",
-    trend: "Trend ↗ +90% citations",
-    bg: "linear-gradient(135deg, #e0f7ff, #c7f5d9)"
-  },
-  {
-    rank: 3,
-    name: "Quantum Computing",
-    trend: "Stable ⚪",
-    bg: "linear-gradient(135deg, #e3e8ff, #f0f4ff)"
-  },
-  {
-    rank: 4,
-    name: "Personalized Medicine",
-    trend: "Trend ↗",
-    bg: "linear-gradient(135deg, #efe9ff, #e9dfff)"
-  },
-  {
-    rank: 5,
-    name: "Sustainable Energy",
-    trend: "",
-    bg: "linear-gradient(135deg, #e6ffec, #d5f5dd)"
-  },
+  { rank: 1, name: "Generative AI & LLMs", trend: "Trend ↗", bg: "linear-gradient(135deg, #ffe1df, #fce4bd)" },
+  { rank: 2, name: "Climate Change Modeling", trend: "Trend ↗", bg: "linear-gradient(135deg, #e0f7ff, #c7f5d9)" },
+  { rank: 3, name: "Quantum Computing", trend: "Stable", bg: "linear-gradient(135deg, #e3e8ff, #f0f4ff)" },
 ]);
 
-/* ---------------------------------------
-   🏆 Hot Papers Data (더미)
-----------------------------------------*/
-const hotPapers = ref([
-  {
-    id: 101,
-    title: "[Flame] Advancements in GPT-5 Architecture",
-    author: "Open Research Team",
-    year: 2025,
-    citation: 520,
-    institution: "Global AI"
-  },
-  {
-    id: 102,
-    title: "[Flame] Efficient Carbon Capture Tech",
-    author: "Green et al.",
-    year: 2024,
-    citation: 410,
-    institution: "Stanford"
-  },
-  {
-    id: 103,
-    title: "[Flame] New Superconductor Materials",
-    author: "Kim & Lee",
-    year: 2025,
-    citation: 380,
-    institution: "KAIST"
-  },
-]);
+/* 🏆 Hot Papers (DB 기반) */
+const hotPapers = ref([]);
+
+onMounted(async () => {
+  const res = await api.get("/papers/");
+  hotPapers.value = res.data
+    .sort((a, b) => b.citation - a.citation)
+    .slice(0, 3);
+});
 </script>
+
 
 <style scoped>
 .trend-page {

@@ -25,28 +25,19 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
+import api from "@/api";
 
 const route = useRoute();
 const paperId = route.params.id;
 
-// 지금은 백엔드 없음 → 더미 데이터로 구성
-const paper = ref({
-  id: paperId,
-  title: "Dummy Paper Title",
-  author: "John Doe",
-  year: 2023,
-  citation: 42,
-  institution: "MIT",
-  abstract:
-    "여기는 논문 초록(Abstract)이 표시되는 영역입니다. 백엔드가 연결되면 실제 논문 초록이 여기에 표시됩니다.",
-});
+const paper = ref(null);
 
-// 백엔드 연결 후 이렇게 바뀔 예정:
-// onMounted(async () => {
-//   const res = await axios.get(`/api/paper/${paperId}`);
-//   paper.value = res.data;
-// });
+onMounted(async () => {
+  const res = await api.get(`/papers/${paperId}/`);
+  paper.value = res.data;
+});
 </script>
+
 
 <style scoped>
 .detail-container {

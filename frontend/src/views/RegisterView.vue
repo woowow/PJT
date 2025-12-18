@@ -84,6 +84,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import api from "@/api";
 
 const router = useRouter();
 
@@ -95,7 +96,7 @@ const confirmPassword = ref("");
 const passwordVisible = ref(false);
 const confirmVisible = ref(false);
 
-const doRegister = () => {
+const doRegister = async () => {
   if (!email.value || !username.value || !password.value || !confirmPassword.value) {
     alert("Please fill in all fields.");
     return;
@@ -106,8 +107,17 @@ const doRegister = () => {
     return;
   }
 
-  alert("Registered successfully!");
-  router.push("/"); // 로그인 페이지로 이동
+  try {
+    await api.post("/auth/register/", {
+      username: username.value,
+      password: password.value,
+    });
+
+    alert("Registered successfully!");
+    router.push("/");   // 로그인 화면
+  } catch (err) {
+    alert("이미 존재하는 아이디입니다.");
+  }
 };
 
 const goLogin = () => router.push("/");
