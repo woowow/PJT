@@ -136,3 +136,113 @@ def paper_detail(request, paper_id):
         return JsonResponse({"error": "not found"}, status=404)
 
     return JsonResponse(rows[0])
+
+def paper_advanced_search(request):
+    keyword = request.GET.get("keyword", "").strip()
+    subject = request.GET.get("subject")
+    country = request.GET.get("country")
+    year_from = request.GET.get("year_from")
+    year_to = request.GET.get("year_to")
+    sort = request.GET.get("sort", "recent")
+
+    must = []
+    filters = []
+
+    # 🔍 키워드
+    if keyword:
+        must.append({
+            "multi_match": {
+                "query": keyword,
+                "fields": ["title^2", "author", "subject"]
+            }
+        })
+
+    # 📌 주제
+    if subject:
+        filters.append({
+            "term": {
+                "subject.keyword": subject
+            }
+        })
+
+    # 🌍 국가
+    if country:
+        filters.append({
+            "term": {
+                "country": country
+            }
+        })
+
+    # 📅 연도
+    if year_from or year_to:
+        range_q = {}
+        if year_from:
+            range_q["gte"] = int(year_from)
+        if year_to:
+            range_q["lte"] = int(year_to)
+
+        filters.append({
+            "range": {
+                "year": range_q
+            }
+        })
+
+    # 🔃 정렬
+    sort_query = (
+        [{"citation": "desc"}]
+        if sort == "citation"
+        else [{"year": "desc"}]
+    )
+
+    query = {
+        "size": 100,
+        "query": {
+            "bool": {
+                "must": must if must else [{"match_all": {}}],
+                "filter": filters
+            }
+        },
+        "sort": sort_query
+    }
+
+    res = es.search(index="papers", body=query)
+
+    results = []
+    for hit in res["hits"]["hits"]:
+        src = hit["_source"]
+        results.append({
+            "id": src["id"],
+            "title": src["title"],
+            "author": src.get("author"),
+            "year": src.get("year"),
+            "citation": src.get("citation", 0),
+            "institution": src.get("institution"),
+            "subject": src.get("subject"),
+            "country": src.get("country"),
+        })
+
+    return JsonResponse(results, safe=False)
+
+def search_options(request):
+    with connection.cursor() as cursor:
+        # 주제 목록
+        cursor.execute("""
+            SELECT DISTINCT category_name
+            FROM category
+            ORDER BY category_name
+        """)
+        subjects = [row[0] for row in cursor.fetchall()]
+
+        # 국가 목록
+        cursor.execute("""
+            SELECT DISTINCT country_code
+            FROM institution
+            WHERE country_code IS NOT NULL
+            ORDER BY country_code
+        """)
+        countries = [row[0] for row in cursor.fetchall()]
+
+    return JsonResponse({
+        "subjects": subjects,
+        "countries": countries,
+    })
