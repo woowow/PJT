@@ -18,7 +18,9 @@
 import { useRouter } from "vue-router";
 const router = useRouter();
 
-const goHome = () => router.push("/home");
+const goHome = () => {
+  router.push({ name: "home" });
+};
 </script>
 
 <style scoped>

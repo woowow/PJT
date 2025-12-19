@@ -1,45 +1,60 @@
 <template>
-  <div class="detail-container">
-    <h1 class="title">{{ paper.title }}</h1>
+  <!-- 🔥 DEBUG: THIS FILE IS LOADED -->
+  <div class="detail-wrapper">
+    <div v-if="paper" class="detail-container">
+      <h1 class="title">{{ paper.title }}</h1>
 
-    <div class="meta-box">
-      <p><strong>저자:</strong> {{ paper.author }}</p>
-      <p><strong>연도:</strong> {{ paper.year }}</p>
-      <p><strong>인용수:</strong> {{ paper.citation }}</p>
-      <p><strong>기관:</strong> {{ paper.institution }}</p>
+      <div class="meta-box">
+        <p><strong>저자:</strong> {{ paper.author || "-" }}</p>
+        <p><strong>연도:</strong> {{ paper.year || "-" }}</p>
+        <p><strong>주제:</strong> {{ paper.subject || "-" }}</p>
+        <p><strong>기관:</strong> {{ paper.institution || "-" }}</p>
+        <p><strong>인용수:</strong> {{ paper.citation ?? 0 }}</p>
+      </div>
+
+      <hr />
+
+      <div class="abstract-box">
+        <h2>초록 (Abstract)</h2>
+        <p v-if="paper.abstract">
+          {{ paper.abstract }}
+        </p>
+        <p v-else class="empty">
+          초록 정보가 제공되지 않는 논문입니다.
+        </p>
+      </div>
     </div>
 
-    <hr />
-
-    <div class="abstract-box">
-      <h2>초록 (Abstract)</h2>
-      <p>{{ paper.abstract }}</p>
+    <!-- 로딩 상태 -->
+    <div v-else class="loading">
+      논문 정보를 불러오는 중입니다...
     </div>
-
-    <hr />
-
-    <!-- 나중에: 추천 논문, 관련 저자, 그래프 등을 더 추가할 예정 -->
   </div>
 </template>
 
 <script setup>
-import { useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import api from "@/api";
 
 const route = useRoute();
-const paperId = route.params.id;
-
 const paper = ref(null);
 
 onMounted(async () => {
-  const res = await api.get(`/papers/${paperId}/`);
-  paper.value = res.data;
+  try {
+    const res = await api.get(`/papers/${route.params.id}/`);
+    paper.value = res.data;
+  } catch (err) {
+    console.error("논문 상세 조회 실패:", err);
+  }
 });
 </script>
 
-
 <style scoped>
+.detail-wrapper {
+  min-height: 400px;
+}
+
 .detail-container {
   max-width: 900px;
   margin: 0 auto;
@@ -58,7 +73,7 @@ onMounted(async () => {
 }
 
 .abstract-box {
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .abstract-box h2 {
@@ -66,8 +81,14 @@ onMounted(async () => {
   margin-bottom: 10px;
 }
 
-.abstract-box p {
-  line-height: 1.6;
-  color: #555;
+.empty {
+  color: #999;
+  font-style: italic;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 80px;
+  color: #666;
 }
 </style>

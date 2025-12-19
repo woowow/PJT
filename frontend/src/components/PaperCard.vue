@@ -35,7 +35,10 @@ const props = defineProps({
 const emit = defineEmits(["toggleBookmark"]);
 
 const openDetail = () => {
-  router.push(`/paper/${props.paper.id}`);
+  router.push({
+    name: "paper-detail",
+    params: { id: props.paper.id }
+  });
 };
 </script>
 

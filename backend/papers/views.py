@@ -2,8 +2,21 @@ from django.http import JsonResponse
 from django.db import connection
 from django.views.decorators.csrf import csrf_exempt
 import json
+from elasticsearch import Elasticsearch
+import os
 
+es = Elasticsearch(os.getenv("ELASTICSEARCH_URL"))
+
+# ======================
+# 공통 유틸
+# ======================
+def dictfetchall(cursor):
+    cols = [col[0] for col in cursor.description]
+    return [dict(zip(cols, row)) for row in cursor.fetchall()]
+
+# ======================
 # 회원가입
+# ======================
 @csrf_exempt
 def register(request):
     if request.method != "POST":
@@ -13,11 +26,7 @@ def register(request):
     username = body.get("username")
     password = body.get("password")
 
-    if not username or not password:
-        return JsonResponse({"error": "missing fields"}, status=400)
-
     with connection.cursor() as cursor:
-        # 중복 체크
         cursor.execute(
             "SELECT 1 FROM guest WHERE guestname = %s",
             [username]
@@ -25,15 +34,16 @@ def register(request):
         if cursor.fetchone():
             return JsonResponse({"error": "user exists"}, status=409)
 
-        # 저장
-        cursor.execute("""
-            INSERT INTO guest (guestname, pwd)
-            VALUES (%s, %s)
-        """, [username, password])
+        cursor.execute(
+            "INSERT INTO guest (guestname, pwd) VALUES (%s, %s)",
+            [username, password]
+        )
 
     return JsonResponse({"message": "registered"})
 
+# ======================
 # 로그인
+# ======================
 @csrf_exempt
 def login(request):
     if request.method != "POST":
@@ -44,102 +54,85 @@ def login(request):
     password = body.get("password")
 
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT guest_id FROM guest
-            WHERE guestname = %s AND pwd = %s
-        """, [username, password])
-
+        cursor.execute(
+            "SELECT guest_id FROM guest WHERE guestname=%s AND pwd=%s",
+            [username, password]
+        )
         row = cursor.fetchone()
-        if not row:
-            return JsonResponse({"error": "invalid credentials"}, status=401)
 
-    return JsonResponse({
-        "message": "login success",
-        "guest_id": row[0]
-    })
+    if not row:
+        return JsonResponse({"error": "invalid credentials"}, status=401)
 
-def dictfetchall(cursor):
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return JsonResponse({"guest_id": row[0]})
 
-
-# 🔹 논문 리스트
+# ======================
+# 🔍 논문 검색 (ES ONLY)
+# ======================
 def paper_list(request):
-    keyword = request.GET.get("keyword", "")
-    subject = request.GET.get("subject", "")
-    country = request.GET.get("country", "")
+    keyword = request.GET.get("keyword", "").strip()
 
-    conditions = []
-    params = []
+    query = {
+        "size": 100,
+        "query": {
+            "multi_match": {
+                "query": keyword,
+                "fields": ["title", "author"]
+            } if keyword else {"match_all": {}}
+        }
+    }
 
-    if keyword:
-        conditions.append("p.title ILIKE %s")
-        params.append(f"%{keyword}%")
+    res = es.search(index="papers", body=query)
 
-    if subject:
-        conditions.append("""
-            (
-              p.title ILIKE %s OR
-              a.author_name ILIKE %s OR
-              c.category_name ILIKE %s
-            )
-        """)
-        params.extend([f"%{subject}%"] * 3)
+    results = []
+    for hit in res["hits"]["hits"]:
+        src = hit["_source"]
+        results.append({
+            "id": src.get("id") or hit["_id"],
+            "title": src.get("title"),
+            "author": src.get("author"),
+            "year": src.get("year"),
+            "citation": src.get("citation", 0),
+            "institution": src.get("institution"),
+            "subject": src.get("subject"),
+            "country": src.get("country"),
+        })
 
-    if country:
-        conditions.append("i.country_code = %s")
-        params.append(country)
+    return JsonResponse(results, safe=False)
 
-    where_clause = ""
-    if conditions:
-        where_clause = "WHERE " + " AND ".join(conditions)
-
-    with connection.cursor() as cursor:
-        cursor.execute(f"""
-            SELECT DISTINCT
-                p.paper_id AS id,
-                p.title,
-                a.author_name AS author,
-                EXTRACT(YEAR FROM p.announcement_date) AS year,
-                p.citation,
-                i.institution_name AS institution
-            FROM paper p
-            LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
-            LEFT JOIN author a ON ap.author_id = a.author_id
-            LEFT JOIN institution i ON p.institution_id = i.institution_id
-            LEFT JOIN category c ON p.category_id = c.category_id
-            {where_clause}
-            ORDER BY p.citation DESC
-            LIMIT 100
-        """, params)
-
-        data = dictfetchall(cursor)
-
-    return JsonResponse(data, safe=False)
-
-
-# 🔹 논문 상세
+# ======================
+# 📄 논문 상세 (PostgreSQL)
+# ======================
 def paper_detail(request, paper_id):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
                 p.paper_id AS id,
                 p.title,
-                a.author_name AS author,
+                STRING_AGG(a.author_name, ', ') AS author,
                 EXTRACT(YEAR FROM p.announcement_date) AS year,
                 p.citation,
                 i.institution_name AS institution,
-                ab.context AS abstract
+                c.category_name AS subject,
+                ab.context AS abstract,
+                p.open_access,
+                p.locations
             FROM paper p
             LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
             LEFT JOIN author a ON ap.author_id = a.author_id
             LEFT JOIN institution i ON p.institution_id = i.institution_id
+            LEFT JOIN category c ON p.category_id = c.category_id
             LEFT JOIN abstract ab ON p.paper_id = ab.paper_id
             WHERE p.paper_id = %s
+            GROUP BY
+                p.paper_id, p.title, p.announcement_date,
+                p.citation, i.institution_name,
+                c.category_name, ab.context,
+                p.open_access, p.locations
         """, [paper_id])
 
-        row = dictfetchall(cursor)
-        if not row:
-            return JsonResponse({"error": "not found"}, status=404)
+        rows = dictfetchall(cursor)
 
-    return JsonResponse(row[0])
+    if not rows:
+        return JsonResponse({"error": "not found"}, status=404)
+
+    return JsonResponse(rows[0])

@@ -5,6 +5,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - "9200:9200"
 
@@ -21,11 +22,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres/table_schema.sql:/docker-entrypoint-initdb.d/table_schema.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
   backend:
     build: ./backend
@@ -35,6 +31,7 @@ services:
       - ./backend/.env
     depends_on:
       - postgres
+      - elasticsearch
     ports:
       - "8000:8000"
     volumes:
@@ -48,17 +45,6 @@ services:
       - backend
     ports:
       - "5173:5173"
-
-  cron:
-    image: curlimages/curl:latest
-    container_name: paper_cron
-    user: root
-    depends_on:
-      - backend
-    entrypoint: >
-      sh -c "echo '0 0 * * 0 curl -X POST http://backend:8000/api/reset-weekly/' > /etc/crontabs/root
-      && crond -f -d 8"
-
 
 volumes:
   pgdata:

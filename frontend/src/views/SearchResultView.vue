@@ -34,7 +34,7 @@
         v-for="item in paginatedPapers"
         :key="item.id"
         :paper="item"
-        :isBookmarked="isBookmarked(item.id)"
+        :isBookmarked="checkBookmarked(item.id)"
         @toggleBookmark="toggleBookmark(item.id)"
       />
     </div>
@@ -63,6 +63,15 @@ import api from "@/api";
 
 const route = useRoute();
 const router = useRouter();
+
+const checkBookmarked = (paperId) => {
+  return false; // 아직 미구현
+}
+
+
+const toggleBookmark = (paper) => {
+  alert('북마크 기능은 아직 구현 중입니다')
+}
 
 /* -------------------------------
    🔑 쿼리 상태 (안전 + 확장 가능)
@@ -100,13 +109,6 @@ const paginatedPapers = computed(() => {
    검색 API
 -------------------------------- */
 const fetchPapers = async () => {
-  if (!queryState.value.keyword &&
-      !queryState.value.subject &&
-      !queryState.value.country) {
-    papers.value = [];
-    return;
-  }
-
   loading.value = true;
 
   try {
@@ -118,8 +120,17 @@ const fetchPapers = async () => {
       },
     });
 
-    console.log("📦 search result:", res.data);
-    papers.value = res.data;
+    papers.value = res.data.map(p => ({
+      id: p.id,
+      title: p.title || "(제목 없음)",
+      author: p.author || "Unknown",
+      year: p.year || "-",
+      citation: p.citation ?? 0,
+      institution: p.institution || "-",
+      category: p.category || "-",
+      country: p.country || "-"
+    }));
+
     page.value = 1;
   } catch (err) {
     console.error(err);
@@ -129,9 +140,17 @@ const fetchPapers = async () => {
   }
 };
 
+
+
 /* 최초 + 쿼리 변경 시 */
-onMounted(fetchPapers);
-watch(() => route.query, fetchPapers, { deep: true });
+watch(
+  () => route.query,
+  async () => {
+    await fetchPapers();
+  },
+  { immediate: true, deep: true }
+);
+
 
 /* -------------------------------
    다시 검색

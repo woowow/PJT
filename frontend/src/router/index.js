@@ -2,29 +2,32 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import MainLayout from "../layouts/MainLayout.vue";
 
-// 개별 페이지
+// 인증
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
+
+// 메인 화면
 import HomeView from "@/views/HomeView.vue";
 import SearchResultView from "@/views/SearchResultView.vue";
 import PaperDetailView from "@/views/PaperDetailView.vue";
 import MyPageView from "@/views/MyPageView.vue";
 import AuthorView from "@/views/AuthorView.vue";
-import RecommendView from "@/views/RecommendView.vue";   // ★ 추가
+import RecommendView from "@/views/RecommendView.vue";
 import TrendView from "@/views/TrendView.vue";
 
-// ⭐ 연구 활동 (캘린더)
+// 연구 활동
 import ActivityCalendarView from "@/views/ActivityCalendarView.vue";
-
 import ReadingBoardView from "@/views/ReadingBoardView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
 
   routes: [
-    // 로그인 & 회원가입은 레이아웃 제외
+    /* =========================
+       Auth (Layout ❌)
+    ========================= */
     {
-      path: "/",
+      path: "/login",
       name: "login",
       component: LoginView,
     },
@@ -34,13 +37,15 @@ const router = createRouter({
       component: RegisterView,
     },
 
-    // 로그인 이후 모든 화면은 MainLayout 안에서 렌더링
+    /* =========================
+       Main (Layout ⭕)
+    ========================= */
     {
       path: "/",
       component: MainLayout,
       children: [
         {
-          path: "home",
+          path: "",
           name: "home",
           component: HomeView,
         },
@@ -57,18 +62,18 @@ const router = createRouter({
           props: true,
         },
         {
-          path: "mypage",
-          name: "mypage",
-          component: MyPageView,
-        },
-        {
           path: "author/:id",
           name: "author",
           component: AuthorView,
           props: true,
         },
         {
-          path: "recommend",               // ★ 추가
+          path: "mypage",
+          name: "mypage",
+          component: MyPageView,
+        },
+        {
+          path: "recommend",
           name: "recommend",
           component: RecommendView,
         },
@@ -88,6 +93,14 @@ const router = createRouter({
           component: ReadingBoardView,
         },
       ],
+    },
+
+    /* =========================
+       Fallback
+    ========================= */
+    {
+      path: "/:pathMatch(.*)*",
+      redirect: "/",
     },
   ],
 });
