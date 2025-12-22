@@ -13,15 +13,6 @@
       <div class="subtitle">Sign up to</div>
       <p class="desc">Lorem Ipsum is simply</p>
 
-      <!-- Email -->
-      <label class="input-label">Email</label>
-      <input 
-        type="email"
-        v-model="email"
-        class="input-box"
-        placeholder="Enter your email"
-      />
-
       <!-- User name -->
       <label class="input-label">User name</label>
       <input 
@@ -88,7 +79,6 @@ import api from "@/api";
 
 const router = useRouter();
 
-const email = ref("");
 const username = ref("");
 const password = ref("");
 const confirmPassword = ref("");
@@ -97,7 +87,7 @@ const passwordVisible = ref(false);
 const confirmVisible = ref(false);
 
 const doRegister = async () => {
-  if (!email.value || !username.value || !password.value || !confirmPassword.value) {
+  if (!username.value || !password.value || !confirmPassword.value) {
     alert("Please fill in all fields.");
     return;
   }

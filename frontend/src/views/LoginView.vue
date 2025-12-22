@@ -73,7 +73,8 @@ const doLogin = async () => {
 
     // 로그인 성공
     localStorage.setItem("guest_id", res.data.guest_id);
-    router.push("/home");
+    window.location.href = "/";
+    router.push("/");
   } catch (err) {
     alert("아이디 또는 비밀번호가 틀렸습니다.");
   }

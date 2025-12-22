@@ -355,3 +355,139 @@ def author_detail(request, author_id):
         "author": author,
         "papers": papers
     })
+    
+    
+@csrf_exempt
+def toggle_favorite(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    body = json.loads(request.body)
+    guest_id = body.get("guest_id")
+    paper_id = body.get("paper_id")
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT favorite_id
+            FROM guestfavorite
+            WHERE guest_id = %s AND paper_id = %s
+        """, [guest_id, paper_id])
+
+        row = cursor.fetchone()
+
+        if row:
+            cursor.execute("""
+                DELETE FROM guestfavorite
+                WHERE favorite_id = %s
+            """, [row[0]])
+            return JsonResponse({"favorited": False})
+
+        else:
+            cursor.execute("""
+                INSERT INTO guestfavorite (guest_id, paper_id, status)
+                VALUES (%s, %s, 'TODO')
+            """, [guest_id, paper_id])
+            return JsonResponse({"favorited": True})
+
+
+def favorite_list(request, guest_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                p.paper_id AS id,
+                p.title,
+                EXTRACT(YEAR FROM p.announcement_date) AS year,
+                p.citation,
+                gf.status
+            FROM guestfavorite gf
+            JOIN paper p ON gf.paper_id = p.paper_id
+            WHERE gf.guest_id = %s
+            ORDER BY p.announcement_date DESC
+        """, [guest_id])
+
+        favorites = dictfetchall(cursor)
+
+        # 🔥 authors 수동으로 명확히 만들어준다
+        for paper in favorites:
+            cursor.execute("""
+                SELECT
+                    a.author_id,
+                    a.author_name
+                FROM authorpaper ap
+                JOIN author a ON ap.author_id = a.author_id
+                WHERE ap.paper_id = %s
+                ORDER BY a.author_name
+            """, [paper["id"]])
+
+            paper["authors"] = [
+                {
+                    "author_id": row[0],
+                    "author_name": row[1]
+                }
+                for row in cursor.fetchall()
+            ]
+
+    return JsonResponse(favorites, safe=False)
+
+def guest_profile(request, guest_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                guest_id,
+                guestname,
+                interest_1,
+                interest_2,
+                interest_3
+            FROM guest
+            WHERE guest_id = %s
+        """, [guest_id])
+
+        row = cursor.fetchone()
+        if not row:
+            return JsonResponse({"error": "not found"}, status=404)
+
+        return JsonResponse({
+            "guest_id": row[0],
+            "guestname": row[1],
+            "interest_1": row[2],
+            "interest_2": row[3],
+            "interest_3": row[4],
+        })
+
+@csrf_exempt
+def update_guest(request, guest_id):
+    if request.method != "PUT":
+        return JsonResponse({"error": "PUT only"}, status=405)
+
+    body = json.loads(request.body)
+    guestname = body.get("guestname")
+    password = body.get("password")
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE guest
+            SET guestname = %s,
+                pwd = %s
+            WHERE guest_id = %s
+        """, [guestname, password, guest_id])
+
+    return JsonResponse({"message": "updated"})
+
+@csrf_exempt
+def update_favorite_status(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    body = json.loads(request.body)
+    guest_id = body.get("guest_id")
+    paper_id = body.get("paper_id")
+    status = body.get("status")
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE guestfavorite
+            SET status = %s
+            WHERE guest_id = %s AND paper_id = %s
+        """, [status, guest_id, paper_id])
+
+    return JsonResponse({"message": "status updated"})

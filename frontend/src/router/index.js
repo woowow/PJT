@@ -43,6 +43,7 @@ const router = createRouter({
     {
       path: "/",
       component: MainLayout,
+      meta: { requiresAuth: true },   // 🔑 핵심
       children: [
         {
           path: "",
@@ -103,6 +104,27 @@ const router = createRouter({
       redirect: "/",
     },
   ],
+});
+
+/* =========================
+   🔐 Global Auth Guard
+========================= */
+router.beforeEach((to, from, next) => {
+  const guestId = localStorage.getItem("guest_id");
+
+  // 로그인 필요 페이지
+  if (to.matched.some(r => r.meta.requiresAuth)) {
+    if (!guestId) {
+      return next("/login");
+    }
+  }
+
+  // 이미 로그인 상태에서 login 접근 방지
+  if ((to.path === "/login" || to.path === "/register") && guestId) {
+    return next("/");
+  }
+
+  next();
 });
 
 export default router;

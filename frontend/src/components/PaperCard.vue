@@ -1,158 +1,136 @@
 <template>
   <div class="paper-card" @click="goDetail">
-    <!-- 제목 -->
-    <h3 class="title">
-      {{ paper.title }}
-    </h3>
-
-    <!-- 메타 정보 -->
-    <p class="meta">
-      <!-- 🔹 저자 목록 (클릭 가능) -->
-      <span
-        v-for="(author, idx) in paper.authors"
-        :key="author.author_id"
-        class="author-link"
-        @click.stop="goAuthor(author.author_id)"
-      >
-        {{ author.author_name }}
-        <span v-if="idx < paper.authors.length - 1">, </span>
-      </span>
-
-      <span v-if="paper.year"> · {{ paper.year }}</span>
-    </p>
-
-    <p class="meta">
-      인용 수: {{ paper.citation ?? 0 }}
-    </p>
-
-    <!-- 북마크 -->
-    <button
-      class="bookmark-btn"
-      @click.stop="emitToggle"
-      :aria-label="isBookmarked ? '북마크 해제' : '북마크 추가'"
-    >
-      {{ isBookmarked ? "★" : "☆" }}
+    <button class="bookmark-btn" @click.stop="toggleBookmark" :title="isFavorited ? '즐겨찾기 해제' : '즐겨찾기'">
+      {{ isFavorited ? "★" : "☆" }}
     </button>
+
+    <h3 class="title">{{ paper.title }}</h3>
+
+    <p class="authors" v-if="paper.authors && paper.authors.length">
+      <span
+        v-for="(a, idx) in paper.authors"
+        :key="a.author_id"
+        class="author"
+        @click.stop="goAuthor(a.author_id)"
+      >
+        {{ a.author_name }}<span v-if="idx < paper.authors.length - 1">, </span>
+      </span>
+    </p>
+    <p v-else class="authors-empty">저자 정보 없음</p>
+
+    <p class="meta">
+      <span>{{ paper.year }}</span>
+      <span class="dot">·</span>
+      <span>인용 {{ paper.citation }}</span>
+    </p>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import api from "@/api";
 
-/* =========================
-   Props
-========================= */
-const props = defineProps({
-  paper: {
-    type: Object,
-    required: true,
-  },
-  isBookmarked: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-/* =========================
-   Emits
-========================= */
-const emit = defineEmits(["toggleBookmark"]);
+const props = defineProps({ paper: Object });
+const emit = defineEmits(["favoriteChanged"]);
 
 const router = useRouter();
+const isFavorited = ref(false);
 
-/* =========================
-   Handlers
-========================= */
-const goDetail = () => {
-  router.push(`/paper/${props.paper.id}`);
+const goDetail = () => router.push(`/paper/${props.paper.id}`);
+const goAuthor = (id) => router.push(`/author/${id}`);
+
+const toggleBookmark = async () => {
+  const guestId = localStorage.getItem("guest_id");
+  if (!guestId) return;
+
+  const res = await api.post("/favorites/toggle/", {
+    guest_id: guestId,
+    paper_id: props.paper.id,
+  });
+
+  isFavorited.value = !!res.data.favorited;
+  emit("favoriteChanged");
 };
 
-const goAuthor = (authorId) => {
-  if (!authorId) return;
-  router.push(`/author/${authorId}`);
-};
+onMounted(async () => {
+  const guestId = localStorage.getItem("guest_id");
+  if (!guestId) return;
 
-const emitToggle = () => {
-  emit("toggleBookmark");
-};
+  // ✅ trailing slash 통일
+  const res = await api.get(`/favorites/${guestId}/`);
+  isFavorited.value = Array.isArray(res.data) && res.data.some((p) => p.id === props.paper.id);
+});
 </script>
 
 <style scoped>
-/* =========================
-   카드 전체
-========================= */
 .paper-card {
   position: relative;
-  padding: 22px 26px;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  background-color: #ffffff;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 16px 16px 14px;
   cursor: pointer;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.04);
 }
 
 .paper-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
   border-color: #c7d2fe;
 }
 
-/* =========================
-   제목
-========================= */
-.title {
-  margin: 0 0 10px 0;
+.bookmark-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   font-size: 18px;
-  font-weight: 600;
-  line-height: 1.45;
-  color: #111827;
+  color: #f59e0b;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
 }
 
-.paper-card:hover .title {
-  text-decoration: underline;
+.title {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin: 2px 38px 8px 0; /* 별 버튼 공간 확보 */
 }
 
-/* =========================
-   메타 정보
-========================= */
-.meta {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #4b5563;
+.authors {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 8px;
 }
 
-/* =========================
-   저자 링크
-========================= */
-.author-link {
+.author {
   text-decoration: underline;
   cursor: pointer;
 }
 
-.author-link:hover {
+.author:hover {
   color: #2563eb;
 }
 
-/* =========================
-   북마크 버튼
-========================= */
-.bookmark-btn {
-  position: absolute;
-  top: 18px;
-  right: 20px;
-
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #f59e0b;
-
-  transition: transform 0.15s ease;
+.authors-empty {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 8px;
 }
 
-.bookmark-btn:hover {
-  transform: scale(1.15);
+.meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dot {
+  margin: 0 6px;
 }
 </style>

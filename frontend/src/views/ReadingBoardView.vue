@@ -1,50 +1,92 @@
 <template>
   <div class="reading-page">
-
     <div class="page-header">
       <h1 class="page-title">연구 진행 보드</h1>
-      <p class="page-desc">
-        즐겨찾기한 논문과 읽기 상태를 드래그로 관리하세요.
-      </p>
+      <p class="page-desc">즐겨찾기한 논문을 드래그해서 읽기 상태를 관리하세요.</p>
     </div>
 
     <div class="board">
-      <ReadingColumn title="⭐ 즐겨찾기" :list="board.bookmark" />
-      <ReadingColumn title="📌 읽을 예정" :list="board.todo" />
-      <ReadingColumn title="👀 읽는 중" :list="board.reading" />
-      <ReadingColumn title="✅ 읽음" :list="board.done" />
+      <ReadingColumn
+        title="📌 읽을 예정"
+        status="TODO"
+        :list="board.TODO"
+        @changeStatus="updateStatus"
+        @refresh="loadFavorites"
+      />
+      <ReadingColumn
+        title="👀 읽는 중"
+        status="READING"
+        :list="board.READING"
+        @changeStatus="updateStatus"
+        @refresh="loadFavorites"
+      />
+      <ReadingColumn
+        title="✅ 읽음"
+        status="DONE"
+        :list="board.DONE"
+        @changeStatus="updateStatus"
+        @refresh="loadFavorites"
+      />
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import api from "@/api";
 import ReadingColumn from "@/components/ReadingColumn.vue";
 
-/* =========================
-   부모가 모든 상태 소유
-========================= */
 const board = ref({
-  bookmark: [
-    { id: 1, title: "Attention Is All You Need" },
-    { id: 2, title: "Diffusion Models Explained" },
-  ],
-  todo: [
-    { id: 3, title: "Reinforcement Learning Survey" },
-  ],
-  reading: [
-    { id: 4, title: "Efficient LLM Inference" },
-  ],
-  done: [],
+  TODO: [],
+  READING: [],
+  DONE: [],
 });
+
+const normalizeStatus = (s) => (s ?? "").toString().trim().toUpperCase();
+
+const loadFavorites = async () => {
+  const guestId = localStorage.getItem("guest_id");
+  if (!guestId) {
+    board.value.TODO = [];
+    board.value.READING = [];
+    board.value.DONE = [];
+    return;
+  }
+
+  // ✅ Django trailing slash 통일
+  const res = await api.get(`/favorites/${guestId}/`);
+  const data = Array.isArray(res.data) ? res.data : [];
+
+  board.value.TODO = data.filter((p) => normalizeStatus(p.status) === "TODO");
+  board.value.READING = data.filter((p) => normalizeStatus(p.status) === "READING");
+  board.value.DONE = data.filter((p) => normalizeStatus(p.status) === "DONE");
+};
+
+const updateStatus = async (paperId, newStatus) => {
+  const guestId = localStorage.getItem("guest_id");
+  if (!guestId) return;
+
+  await api.post("/favorites/status/", {
+    guest_id: guestId,
+    paper_id: paperId,
+    status: newStatus,
+  });
+
+  await loadFavorites(); // ✅ 서버 기준으로 동기화
+};
+
+onMounted(loadFavorites);
 </script>
 
 <style scoped>
 .reading-page {
-  max-width: 1600px;
-  margin: auto;
-  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.page-header {
+  margin-bottom: 18px;
 }
 
 .page-title {
@@ -55,13 +97,13 @@ const board = ref({
 .page-desc {
   margin-top: 6px;
   font-size: 14px;
-  color: #666;
+  color: #6b7280;
 }
 
 .board {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-top: 30px;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 18px;
+  align-items: start;
 }
 </style>

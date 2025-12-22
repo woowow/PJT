@@ -65,6 +65,7 @@ CREATE TABLE guestfavorite(
   favorite_id SERIAL PRIMARY KEY,
   guest_id INTEGER NOT NULL,
   paper_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'TODO',
   UNIQUE(guest_id, paper_id),
   FOREIGN KEY (guest_id) REFERENCES guest(guest_id),
   FOREIGN KEY (paper_id) REFERENCES paper(paper_id)
@@ -74,7 +75,7 @@ CREATE TABLE guestcategorycount(
   ucc_id SERIAL PRIMARY KEY,
   guest_id INTEGER NOT NULL,
   category_id INTEGER NOT NULL,
-  count INTEGER DEFAULT 0,
+  cnt INTEGER DEFAULT 0,
   FOREIGN KEY (guest_id) REFERENCES guest(guest_id),
   FOREIGN KEY (category_id) REFERENCES category(category_id)
 );

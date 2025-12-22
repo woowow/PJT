@@ -30,11 +30,10 @@
 
     <div v-else-if="paginatedPapers.length > 0" class="results">
       <PaperCard
-        v-for="item in paginatedPapers"
-        :key="item.id"
-        :paper="item"
-        :isBookmarked="checkBookmarked(item.id)"
-        @toggleBookmark="() => toggleBookmark(item.id)"
+        v-for="paper in papers"
+        :key="paper.id"
+        :paper="paper"
+        @favoriteChanged="onFavoriteChanged"
       />
     </div>
 
@@ -86,6 +85,11 @@ const loading = ref(false);
 -------------------------------- */
 const page = ref(1);
 const pageSize = 10;
+
+const onFavoriteChanged = () => {
+  // 아무것도 안 해도 OK
+  // MyPage → 즐겨찾기 탭으로 가면 ReadingBoard가 새로 mount됨
+};
 
 const totalPages = computed(() =>
   Math.ceil(papers.value.length / pageSize)

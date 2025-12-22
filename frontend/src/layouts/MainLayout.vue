@@ -18,16 +18,29 @@
         <router-link to="/reading" class="nav-item">연구현황</router-link>
       </nav>
 
-      <!-- 오른쪽: 로그아웃 -->
+      <!-- 오른쪽: Login / Logout -->
       <div class="nav-right">
-        <span class="logout-btn" @click="logout">Logout</span>
+        <span
+          v-if="!isLoggedIn"
+          class="auth-btn"
+          @click="goLogin"
+        >
+          Login
+        </span>
+
+        <span
+          v-else
+          class="auth-btn"
+          @click="logout"
+        >
+          Logout
+        </span>
       </div>
 
     </header>
 
     <!-- 본문 -->
     <main class="main-content">
-      <!-- ★ slot 대신 router-view 를 반드시 사용해야 한다 -->
       <router-view />
     </main>
 
@@ -35,16 +48,41 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+
 const router = useRouter();
 
-const goHome = () => router.push("/home");
+/* =========================
+   로그인 상태 (반응형)
+========================= */
+const isLoggedIn = ref(false);
+
+const syncLoginState = () => {
+  isLoggedIn.value = !!localStorage.getItem("guest_id");
+};
+
+onMounted(syncLoginState);
+
+/* =========================
+   Actions
+========================= */
+const goHome = () => {
+  router.push("/");
+};
+
+const goLogin = () => {
+  router.push("/login");
+};
 
 const logout = () => {
-  localStorage.removeItem("user");
+  localStorage.removeItem("guest_id");
+  alert("로그아웃 되었습니다.");
+  syncLoginState();      // ⭐ 핵심
   router.push("/");
 };
 </script>
+
 
 <style scoped>
 /* 전체 레이아웃 */
@@ -95,18 +133,18 @@ const logout = () => {
   color: #000;
 }
 
-/* 오른쪽: 로그아웃 */
+/* 오른쪽: 인증 버튼 */
 .nav-right {
   font-size: 14px;
 }
 
-.logout-btn {
+.auth-btn {
   cursor: pointer;
   color: #666;
   font-weight: 500;
 }
 
-.logout-btn:hover {
+.auth-btn:hover {
   color: #000;
 }
 
