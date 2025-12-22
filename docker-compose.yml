@@ -22,11 +22,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres/table_schema.sql:/docker-entrypoint-initdb.d/table_schema.sql
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
   backend:
     build: ./backend
