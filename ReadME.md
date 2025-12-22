@@ -19,3 +19,8 @@ docker-compose up --build
 
 merge_and_insert.py를 실행해서 적재한다.
 
+
+docker-compose down
+docker-compose up -d --build
+ES 뜰 때까지 대기 (약 30초)
+docker exec -it paper_backend python scripts/index_to_es.py
