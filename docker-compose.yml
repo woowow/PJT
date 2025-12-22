@@ -46,5 +46,55 @@ services:
     ports:
       - "5173:5173"
 
+  cron:
+    image: curlimages/curl:latest
+    container_name: paper_cron
+    user: root
+    depends_on:
+      - backend
+    entrypoint: >
+      sh -c "echo '0 0 * * 0 curl -X POST http://backend:8000/api/reset-weekly/' > /etc/crontabs/root && crond -f -d 8"
+
+  namenode:
+    build:
+      context: ./hadoop
+      dockerfile: Dockerfile
+    container_name: namenode
+    hostname: namenode
+    ports:
+      - "9870:9870" # HDFS 웹 UI
+      - "9000:9000" # RPC 통신 포트
+    volumes:
+      - ./hadoop_data/namenode:/usr/local/hadoop/hdfs/namenode
+    networks:
+      - paper-net
+
+  datanode1:
+    build:
+      context: ./hadoop
+      dockerfile: Dockerfile
+    container_name: datanode1
+    hostname: datanode1
+    volumes:
+      - ./hadoop_data/datanode1:/usr/local/hadoop/hdfs/datanode
+    networks:
+      - paper-net
+
+  datanode2:
+    build:
+      context: ./hadoop
+      dockerfile: Dockerfile
+    container_name: datanode2
+    hostname: datanode2
+    volumes:
+      - ./hadoop_data/datanode2:/usr/local/hadoop/hdfs/datanode
+    networks:
+      - paper-net
+
 volumes:
   pgdata:
+
+
+networks:
+  paper-net:
+    driver: bridge

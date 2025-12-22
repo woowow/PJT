@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS guest(
 ----------------------------------------------------
 -- GUEST FAVORITE
 ----------------------------------------------------
-CREATE TABLE IF NOT EXISTS guestfavorite(
+CREATE TABLE guestfavorite(
   favorite_id SERIAL PRIMARY KEY,
   guest_id INTEGER NOT NULL,
   paper_id INTEGER NOT NULL,
