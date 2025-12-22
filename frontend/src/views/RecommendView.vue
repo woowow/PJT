@@ -2,11 +2,25 @@
   <div class="recommend-page">
 
     <!-- ------------------------------------- -->
+    <!-- (0) 관심있는 주제 기반 추천 (MyPage에서 이동) -->
+    <!-- ------------------------------------- -->
+    <section class="interest-wrapper">
+      <h2 class="interest-title">관심있는 주제 기반 추천</h2>
+      <div class="interest-desc">
+        아래 관심 Topic 필터를 기준으로 추천을 제공할 예정입니다.
+      </div>
+
+      <div class="empty-box">
+        🚧 추천 기능은 추후 구현 예정입니다.
+      </div>
+    </section>
+
+    <!-- ------------------------------------- -->
     <!-- (1) 사용자 관심 Topic 태그 필터 영역 -->
     <!-- ------------------------------------- -->
     <div class="topic-filter">
-      <button 
-        v-for="t in interestTopics" 
+      <button
+        v-for="t in interestTopics"
         :key="t"
         class="topic-btn"
         :class="{ active: selectedTopic === t }"
@@ -17,7 +31,7 @@
     </div>
 
     <!-- ------------------------------------- -->
-    <!-- (2) 즐겨찾기 기반 추천 섹션 (박스 감싸기 추가!) -->
+    <!-- (2) 즐겨찾기 기반 추천 섹션 -->
     <!-- ------------------------------------- -->
     <section class="recommend-wrapper">
       <h2 class="recommend-title">
@@ -36,7 +50,7 @@
     <!-- ------------------------------------- -->
     <!-- (3) 카테고리별 추천 섹션 (Interest) -->
     <!-- ------------------------------------- -->
-    <section 
+    <section
       v-for="category in categoryRecommend"
       :key="category.name"
       class="category-section"
@@ -131,6 +145,36 @@ const categoryRecommend = ref([
   padding: 40px 0;
 }
 
+/* (0) 관심있는 주제 기반 추천 (이동된 영역) */
+.interest-wrapper {
+  background: white;
+  padding: 26px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.interest-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.interest-desc {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 14px;
+}
+
+.empty-box {
+  background: #f8fafc;
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  color: #777;
+  font-size: 14px;
+}
+
 /* ------------------------ */
 /*     Interest Topics      */
 /* ------------------------ */
@@ -155,7 +199,7 @@ const categoryRecommend = ref([
 }
 
 /* -------------------------------------------- */
-/*  (2) 즐겨찾기 추천 박스 — 크림색 박스 추가! */
+/*  (2) 즐겨찾기 추천 박스 */
 /* -------------------------------------------- */
 .recommend-wrapper {
   background: #f8f6ef;

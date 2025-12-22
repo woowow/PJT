@@ -23,13 +23,7 @@
         즐겨찾기한 논문
       </div>
 
-      <div
-        class="sidebar-item"
-        :class="{ active: activeMenu === 'topics' }"
-        @click="activeMenu = 'topics'"
-      >
-        관심있는 주제 추천
-      </div>
+      <!-- ❌ 제거: 관심있는 주제 추천 -->
     </aside>
 
     <!-- =========================
@@ -77,17 +71,7 @@
         <ReadingBoardView :key="activeMenu" />
       </section>
 
-      <!-- =========================
-           3. 관심 주제 추천 (미구현)
-      ========================= -->
-      <section v-if="activeMenu === 'topics'" class="section">
-        <h2 class="section-title">관심있는 주제 기반 추천</h2>
-
-        <div class="empty-box">
-          🚧 추천 기능은 추후 구현 예정입니다.
-        </div>
-      </section>
-
+      <!-- ❌ 제거: 관심 주제 추천 섹션 -->
     </main>
   </div>
 </template>
@@ -243,14 +227,5 @@ onMounted(loadProfile);
   background: #f3f4f6;
   font-size: 15px;
   color: #555;
-}
-
-.empty-box {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  color: #777;
-  font-size: 15px;
 }
 </style>

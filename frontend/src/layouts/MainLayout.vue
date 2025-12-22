@@ -14,8 +14,7 @@
         <router-link to="/trend" class="nav-item">트렌드</router-link>
         <router-link to="/recommend" class="nav-item">추천</router-link>
         <router-link to="/mypage" class="nav-item">마이페이지</router-link>
-        <router-link to="/activity" class="nav-item">연구달력</router-link>
-        <router-link to="/reading" class="nav-item">연구현황</router-link>
+        <!-- ❌ 제거: 연구달력(/activity), 연구현황(/reading) -->
       </nav>
 
       <!-- 오른쪽: Login / Logout -->
@@ -83,7 +82,6 @@ const logout = () => {
 };
 </script>
 
-
 <style scoped>
 /* 전체 레이아웃 */
 .layout {
@@ -119,8 +117,8 @@ const logout = () => {
 .nav-center {
   display: flex;
   justify-content: center;
-  gap: 150px;
-  flex-grow: 1; 
+  gap: 120px; /* 메뉴 3개라 기존 150px는 너무 넓을 수 있어 적당히 조정 */
+  flex-grow: 1;
 }
 
 .nav-item {
