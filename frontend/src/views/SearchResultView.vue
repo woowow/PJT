@@ -21,6 +21,8 @@
       <p><strong>키워드:</strong> {{ queryState.keyword || "-" }}</p>
       <p><strong>주제:</strong> {{ queryState.subject || "-" }}</p>
       <p><strong>국가:</strong> {{ queryState.country || "-" }}</p>
+      <p><strong>기간:</strong> {{ periodLabel }}</p>
+      <p><strong>정렬:</strong> {{ sortLabel }}</p>
     </div>
 
     <hr />
@@ -28,7 +30,6 @@
     <div v-if="loading">검색 중...</div>
 
     <div v-else-if="paginatedPapers.length > 0" class="results">
-      <!-- ✅ paginatedPapers를 렌더링해야 페이지네이션이 동작 -->
       <PaperCard
         v-for="paper in paginatedPapers"
         :key="paper.id"
@@ -37,9 +38,7 @@
       />
     </div>
 
-    <div v-else class="no-result">
-      검색 결과가 없습니다.
-    </div>
+    <div v-else class="no-result">검색 결과가 없습니다.</div>
 
     <!-- 🔵 페이지네이션 -->
     <div class="pagination" v-if="papers.length > pageSize">
@@ -61,20 +60,46 @@ const router = useRouter();
 
 /* -------------------------------
   Query State
-  - Hot Topics에서 subject로 넘어옴
-  - 혹시 다른 이름으로 넘어오는 케이스도 대비해서 fallback 추가
+  ✅ HomeView 레거시(from/to, sortCitation 등) fallback 지원
 -------------------------------- */
-const queryState = computed(() => ({
-  keyword: route.query.keyword || "",
-  // ✅ Hot Topics: subject로 넘어오게 구현했지만, 혹시 category_name 등으로 넘어와도 표시되게 처리
-  subject: route.query.subject || route.query.category_name || "",
-  country: route.query.country || route.query.country_code || "",
-  year_from: route.query.year_from || "",
-  year_to: route.query.year_to || "",
-  sort: route.query.sort || "",
-}));
+const queryState = computed(() => {
+  const q = route.query;
+
+  const keyword = q.keyword || "";
+
+  const subject = q.subject || q.category_name || "";
+
+  const country = q.country || q.country_code || "";
+
+  // ✅ fallback: from/to -> year_from/year_to
+  const year_from = q.year_from || q.from || "";
+  const year_to = q.year_to || q.to || "";
+
+  // ✅ fallback: sort 없으면 sortCitation/sortRecent 체크박스 기반으로 추론
+  let sort = q.sort || "";
+  if (!sort) {
+    const sortCitation = q.sortCitation === "true" || q.sortCitation === true;
+    const sortRecent = q.sortRecent === "true" || q.sortRecent === true;
+    sort = sortCitation ? "citation" : (sortRecent ? "recent" : "recent");
+  }
+  if (sort !== "citation") sort = "recent"; // 값 방어
+
+  return { keyword, subject, country, year_from, year_to, sort };
+});
 
 const keywordInput = ref(queryState.value.keyword);
+
+/* 표시용 라벨 */
+const periodLabel = computed(() => {
+  const yf = queryState.value.year_from;
+  const yt = queryState.value.year_to;
+  if (!yf && !yt) return "-";
+  return `${yf || "?"} ~ ${yt || "?"}`;
+});
+
+const sortLabel = computed(() => {
+  return queryState.value.sort === "citation" ? "인용순" : "최신순";
+});
 
 /* -------------------------------
   State
@@ -88,13 +113,9 @@ const loading = ref(false);
 const page = ref(1);
 const pageSize = 10;
 
-const onFavoriteChanged = () => {
-  // nothing (필요하면 여기서 재조회 트리거 가능)
-};
+const onFavoriteChanged = () => {};
 
-const totalPages = computed(() =>
-  Math.ceil(papers.value.length / pageSize)
-);
+const totalPages = computed(() => Math.ceil(papers.value.length / pageSize));
 
 const paginatedPapers = computed(() => {
   const start = (page.value - 1) * pageSize;
@@ -102,37 +123,25 @@ const paginatedPapers = computed(() => {
 });
 
 /* -------------------------------
-  Fetch Papers
+  Fetch Papers (advanced로 통일)
 -------------------------------- */
 const fetchPapers = async () => {
   loading.value = true;
 
-  const isAdvanced =
-    !!queryState.value.subject ||
-    !!queryState.value.country ||
-    !!queryState.value.year_from ||
-    !!queryState.value.year_to ||
-    !!queryState.value.sort;
-
   try {
-    const res = isAdvanced
-      ? await api.get("/papers/search/advanced/", {
-          params: {
-            keyword: queryState.value.keyword,
-            subject: queryState.value.subject,
-            country: queryState.value.country,
-            year_from: queryState.value.year_from,
-            year_to: queryState.value.year_to,
-            sort: queryState.value.sort,
-          },
-        })
-      : await api.get("/papers/", {
-          params: { keyword: queryState.value.keyword },
-        });
+    const res = await api.get("/papers/search/advanced/", {
+      params: {
+        keyword: queryState.value.keyword,
+        subject: queryState.value.subject,
+        country: queryState.value.country,
+        year_from: queryState.value.year_from,
+        year_to: queryState.value.year_to,
+        sort: queryState.value.sort,
+      },
+    });
 
     const arr = Array.isArray(res.data) ? res.data : [];
 
-    // ✅ PaperCard가 기대하는 구조 그대로 전달
     papers.value = arr.map((p) => ({
       id: p.id,
       title: p.title || "(제목 없음)",
@@ -154,11 +163,7 @@ const fetchPapers = async () => {
 };
 
 /* route.query가 바뀌면 자동 검색 */
-watch(
-  () => route.query,
-  fetchPapers,
-  { immediate: true }
-);
+watch(() => route.query, fetchPapers, { immediate: true });
 
 /* route 쿼리 바뀔 때 input도 동기화 */
 watch(
@@ -169,12 +174,13 @@ watch(
 );
 
 /* -------------------------------
-  Re-search (단순 검색)
+  Re-search
 -------------------------------- */
 const searchAgain = () => {
   router.push({
     name: "search",
     query: {
+      ...route.query,
       keyword: keywordInput.value,
     },
   });

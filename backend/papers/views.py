@@ -474,12 +474,20 @@ def favorite_list(request, guest_id):
 # 🔎 상세 검색
 # ======================
 def paper_advanced_search(request):
-    keyword = request.GET.get("keyword", "").strip()
-    subject = request.GET.get("subject")
-    country = request.GET.get("country")
-    year_from = request.GET.get("year_from")
-    year_to = request.GET.get("year_to")
-    sort = request.GET.get("sort", "recent")
+    # ✅ 여러 키 이름을 허용해서 방어
+    def get_any(*keys, default=""):
+        for k in keys:
+            v = request.GET.get(k)
+            if v is not None and str(v).strip() != "":
+                return str(v).strip()
+        return default
+
+    keyword = get_any("keyword", "q")
+    subject = get_any("subject", "category", "topic", "category_name")
+    country = get_any("country", "country_code", "countryCode")
+    year_from = get_any("year_from", "yearFrom", "from")
+    year_to = get_any("year_to", "yearTo", "to")
+    sort = get_any("sort", "order", default="recent") or "recent"
 
     must = []
     filters = []
@@ -493,18 +501,23 @@ def paper_advanced_search(request):
         })
 
     if subject:
+        # subject는 보통 text + keyword가 자동 생성됨
         filters.append({"term": {"subject.keyword": subject}})
 
     if country:
-        filters.append({"term": {"country": country}})
+        # country는 코드라 keyword로 고정 매칭 권장
+        filters.append({"term": {"country.keyword": country}})
 
     if year_from or year_to:
         range_q = {}
-        if year_from:
-            range_q["gte"] = int(year_from)
-        if year_to:
-            range_q["lte"] = int(year_to)
-        filters.append({"range": {"year": range_q}})
+        try:
+            if year_from:
+                range_q["gte"] = int(year_from)
+            if year_to:
+                range_q["lte"] = int(year_to)
+            filters.append({"range": {"year": range_q}})
+        except ValueError:
+            pass
 
     sort_query = ([{"citation": "desc"}] if sort == "citation" else [{"year": "desc"}])
 
@@ -553,6 +566,7 @@ def paper_advanced_search(request):
             })
 
     return JsonResponse(results, safe=False)
+
 
 
 def search_options(request):

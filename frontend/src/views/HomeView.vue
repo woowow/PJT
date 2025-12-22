@@ -1,7 +1,5 @@
 <template>
   <div class="home-container">
-
-
     <!-- 로고 -->
     <div class="logo-wrapper">
       <img src="@/assets/main_image.png" class="logo-img" />
@@ -33,7 +31,6 @@
     <!-- 상세 검색 모달 -->
     <div v-if="isDetailSearchOpen" class="modal-overlay">
       <div class="modal-box">
-
         <!-- 상단 -->
         <div class="modal-header">
           <h2>상세 검색</h2>
@@ -41,7 +38,6 @@
         </div>
 
         <div class="modal-section">
-
           <!-- 검색어 -->
           <label class="modal-label">검색어 입력</label>
           <input type="text" class="modal-input" v-model="detail.keyword" />
@@ -56,7 +52,7 @@
               placeholder="주제 검색"
               class="dropdown-main-input"
               @focus="openSubject"
-              @blur="onBlur"
+              @blur="onSubjectBlur"
             />
 
             <span class="arrow" @click.stop="toggleSubject">▼</span>
@@ -116,14 +112,30 @@
                 <input type="radio" v-model="detail.dateType" value="range" />
                 From
               </label>
-              <input type="text" class="modal-date" v-model="detail.from" placeholder="YYYY" />
+              <input
+                type="text"
+                class="modal-date"
+                v-model="detail.from"
+                placeholder="YYYY"
+              />
               <span>To</span>
-              <input type="text" class="modal-date" v-model="detail.to" placeholder="YYYY" />
+              <input
+                type="text"
+                class="modal-date"
+                v-model="detail.to"
+                placeholder="YYYY"
+              />
             </div>
 
             <div class="date-options">
-              <label><input type="radio" v-model="detail.dateType" value="1year" /> 최근 1년</label>
-              <label><input type="radio" v-model="detail.dateType" value="all" /> 모든 날짜</label>
+              <label
+                ><input type="radio" v-model="detail.dateType" value="1year" />
+                최근 1년</label
+              >
+              <label
+                ><input type="radio" v-model="detail.dateType" value="all" />
+                모든 날짜</label
+              >
             </div>
           </div>
 
@@ -132,32 +144,43 @@
           <!-- 정렬 -->
           <label class="modal-label">정렬 형태</label>
           <div class="sort-options">
-            <label><input type="checkbox" v-model="detail.sortRecent" /> 최신순</label>
-            <label><input type="checkbox" v-model="detail.sortCitation" /> 인용순</label>
+            <!-- UI는 체크박스 유지하되, 로직에서 sort 하나로 결정 -->
+            <label
+              ><input type="checkbox" v-model="detail.sortRecent" />
+              최신순</label
+            >
+            <label
+              ><input type="checkbox" v-model="detail.sortCitation" />
+              인용순</label
+            >
           </div>
         </div>
 
         <div class="modal-footer">
-          <button class="reset-btn" @click="resetDetail">↺ 검색값 초기화</button>
-          <button class="modal-search-btn" @click="submitDetailSearch">Search</button>
+          <button class="reset-btn" @click="resetDetail">
+            ↺ 검색값 초기화
+          </button>
+          <button class="modal-search-btn" @click="submitDetailSearch">
+            Search
+          </button>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import ProfileIcon from "@/components/ProfileIcon.vue";
+import api from "@/api";
 
 const router = useRouter();
 const keyword = ref("");
 
 const goSearch = () => {
-  if (!keyword.value.trim()) return;
-  router.push(`/search?keyword=${keyword.value}`);
+  const k = keyword.value.trim();
+  if (!k) return;
+  router.push({ name: "search", query: { keyword: k } });
 };
 
 // 상세 검색 값들
@@ -169,50 +192,29 @@ const detail = ref({
   country: "",
   from: "",
   to: "",
-  dateType: "null",
-  sortRecent: false,
+  dateType: "all", // range | 1year | all
+  sortRecent: true,
   sortCitation: false,
 });
 
-// 초기화
-const resetDetail = () => {
-  detail.value = {
-    keyword: "",
-    subject: "",
-    country: "",
-    from: "",
-    to: "",
-    dateType: "null",
-    sortRecent: false,
-    sortCitation: false,
-  };
+/* ✅ 옵션을 백엔드에서 로드 */
+const countryList = ref([]);
+const subjectList = ref([]);
 
-  subjectSearch.value = "";
-  countrySearch.value = "";
-  isSubjectOpen.value = false;
-  isCountryOpen.value = false;
+const loadOptions = async () => {
+  try {
+    const res = await api.get("/papers/search/options/");
+    subjectList.value = res.data?.subjects || [];
+    countryList.value = res.data?.countries || [];
+  } catch (e) {
+    console.error("옵션 로딩 실패", e);
+    // 그래도 최소한 UI는 동작하도록 fallback
+    if (subjectList.value.length === 0) subjectList.value = [];
+    if (countryList.value.length === 0) countryList.value = [];
+  }
 };
 
-// 검색 실행
-const submitDetailSearch = () => {
-  const query = new URLSearchParams({
-    keyword: detail.value.keyword,
-    subject: detail.value.subject,
-    country: detail.value.country,
-    from: detail.value.from,
-    to: detail.value.to,
-    dateType: detail.value.dateType,
-    sortRecent: detail.value.sortRecent,
-    sortCitation: detail.value.sortCitation,
-  });
-
-  isDetailSearchOpen.value = false;
-  router.push(`/search?${query.toString()}`);
-};
-
-// 드롭다운 데이터
-const countryList = ref(["KR", "US", "JP", "CN", "DE", "FR", "UK"]);
-const subjectList = ref(["AI", "Physics", "Chemistry", "Biology", "Math", "Economics"]);
+onMounted(loadOptions);
 
 // dropdown states
 const isCountryOpen = ref(false);
@@ -224,16 +226,20 @@ const subjectSearch = ref("");
 // 필터링
 const filteredCountries = computed(() =>
   countrySearch.value
-    ? countryList.value.filter(item =>
-        item.toLowerCase().includes(countrySearch.value.toLowerCase())
+    ? countryList.value.filter((item) =>
+        String(item)
+          .toLowerCase()
+          .includes(countrySearch.value.toLowerCase())
       )
     : countryList.value
 );
 
 const filteredSubjects = computed(() =>
   subjectSearch.value
-    ? subjectList.value.filter(item =>
-        item.toLowerCase().includes(subjectSearch.value.toLowerCase())
+    ? subjectList.value.filter((item) =>
+        String(item)
+          .toLowerCase()
+          .includes(subjectSearch.value.toLowerCase())
       )
     : subjectList.value
 );
@@ -242,15 +248,12 @@ const filteredSubjects = computed(() =>
 const openSubject = () => {
   isSubjectOpen.value = true;
 };
-
 const toggleSubject = () => {
   isSubjectOpen.value = !isSubjectOpen.value;
 };
-
-const onBlur = () => {
+const onSubjectBlur = () => {
   setTimeout(() => (isSubjectOpen.value = false), 150);
 };
-
 const selectSubject = (item) => {
   detail.value.subject = item;
   subjectSearch.value = item;
@@ -261,19 +264,70 @@ const selectSubject = (item) => {
 const openCountry = () => {
   isCountryOpen.value = true;
 };
-
 const toggleCountry = () => {
   isCountryOpen.value = !isCountryOpen.value;
 };
-
 const onCountryBlur = () => {
   setTimeout(() => (isCountryOpen.value = false), 150);
 };
-
 const selectCountry = (item) => {
   detail.value.country = item;
   countrySearch.value = item;
   isCountryOpen.value = false;
+};
+
+// 초기화
+const resetDetail = () => {
+  detail.value = {
+    keyword: "",
+    subject: "",
+    country: "",
+    from: "",
+    to: "",
+    dateType: "all",
+    sortRecent: true,
+    sortCitation: false,
+  };
+
+  subjectSearch.value = "";
+  countrySearch.value = "";
+  isSubjectOpen.value = false;
+  isCountryOpen.value = false;
+};
+
+// ✅ 표준 쿼리(year_from/year_to/sort)로 변환해서 search로 push
+const submitDetailSearch = () => {
+  const q = {};
+
+  const k = detail.value.keyword.trim();
+  const s = String(detail.value.subject || "").trim();
+  const c = String(detail.value.country || "").trim();
+
+  if (k) q.keyword = k;
+  if (s) q.subject = s;
+  if (c) q.country = c;
+
+  // 날짜 범위
+  const nowYear = new Date().getFullYear();
+  const dateType = detail.value.dateType;
+
+  if (dateType === "range") {
+    const yf = detail.value.from.trim();
+    const yt = detail.value.to.trim();
+    if (yf) q.year_from = yf;
+    if (yt) q.year_to = yt;
+  } else if (dateType === "1year") {
+    q.year_from = String(nowYear - 1);
+    q.year_to = String(nowYear);
+  }
+  // all이면 year_from/year_to 안 넣음
+
+  // 정렬 (체크박스 UI 유지)
+  // 인용순이 체크면 citation 우선, 아니면 recent
+  q.sort = detail.value.sortCitation ? "citation" : "recent";
+
+  isDetailSearchOpen.value = false;
+  router.push({ name: "search", query: q });
 };
 </script>
 
@@ -373,7 +427,7 @@ const selectCountry = (item) => {
   width: 100%;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   max-height: 200px;
   overflow-y: auto;
   padding: 10px 0;
@@ -399,7 +453,7 @@ const selectCountry = (item) => {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;

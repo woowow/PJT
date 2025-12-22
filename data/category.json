@@ -1,43 +1,8 @@
 [
   {
-    "category_id": 1,
-    "category_name": "Machine Learning",
-    "alex_category_id": "C101"
-  },
-  {
-    "category_id": 2,
-    "category_name": "Computer Vision",
-    "alex_category_id": "C102"
-  },
-  {
-    "category_id": 33,
-    "category_name": "Data science",
-    "alex_category_id": "2522767166"
-  },
-  {
-    "category_id": 481,
-    "category_name": "Literature",
-    "alex_category_id": "124952713"
-  },
-  {
-    "category_id": 252,
-    "category_name": "Environmental resource management",
-    "alex_category_id": "107826830"
-  },
-  {
-    "category_id": 238,
-    "category_name": "Endocrinology",
-    "alex_category_id": "134018914"
-  },
-  {
-    "category_id": 421,
-    "category_name": "Physical therapy",
-    "alex_category_id": "1862650"
-  },
-  {
-    "category_id": 673,
-    "category_name": "Zoology",
-    "alex_category_id": "90856448"
+    "category_id": 263,
+    "category_name": "Accounting",
+    "alex_category_id": "121955636"
   },
   {
     "category_id": 51,
@@ -45,1388 +10,1413 @@
     "alex_category_id": "154945302"
   },
   {
-    "category_id": 518,
-    "category_name": "Process engineering",
-    "alex_category_id": "21880701"
-  },
-  {
-    "category_id": 291,
-    "category_name": "Marketing",
-    "alex_category_id": "162853370"
-  },
-  {
-    "category_id": 279,
-    "category_name": "Management science",
-    "alex_category_id": "539667460"
-  },
-  {
-    "category_id": 597,
-    "category_name": "Engineering ethics",
-    "alex_category_id": "55587333"
-  },
-  {
-    "category_id": 227,
-    "category_name": "Cardiology",
-    "alex_category_id": "164705383"
-  },
-  {
-    "category_id": 453,
-    "category_name": "Regional science",
-    "alex_category_id": "148383697"
-  },
-  {
-    "category_id": 60,
-    "category_name": "Epistemology",
-    "alex_category_id": "111472728"
-  },
-  {
-    "category_id": 582,
-    "category_name": "Advertising",
-    "alex_category_id": "112698675"
-  },
-  {
-    "category_id": 331,
-    "category_name": "Econometrics",
-    "alex_category_id": "149782125"
-  },
-  {
-    "category_id": 134,
-    "category_name": "Crystallography",
-    "alex_category_id": "8010536"
-  },
-  {
-    "category_id": 55,
-    "category_name": "Data mining",
-    "alex_category_id": "124101348"
-  },
-  {
-    "category_id": 54,
-    "category_name": "Computational biology",
-    "alex_category_id": "70721500"
-  },
-  {
-    "category_id": 326,
-    "category_name": "Software engineering",
-    "alex_category_id": "115903868"
-  },
-  {
-    "category_id": 463,
-    "category_name": "Political economy",
-    "alex_category_id": "138921699"
-  },
-  {
-    "category_id": 624,
-    "category_name": "Economic geography",
-    "alex_category_id": "26271046"
-  },
-  {
-    "category_id": 512,
-    "category_name": "Composite material",
-    "alex_category_id": "159985019"
-  },
-  {
-    "category_id": 335,
-    "category_name": "Theoretical computer science",
-    "alex_category_id": "80444323"
-  },
-  {
-    "category_id": 209,
-    "category_name": "Neuroscience",
-    "alex_category_id": "169760540"
-  },
-  {
-    "category_id": 278,
-    "category_name": "Environmental economics",
-    "alex_category_id": "134560507"
-  },
-  {
-    "category_id": 647,
-    "category_name": "Economy",
-    "alex_category_id": "136264566"
-  },
-  {
-    "category_id": 260,
-    "category_name": "Ecology",
-    "alex_category_id": "18903297"
-  },
-  {
-    "category_id": 251,
-    "category_name": "Environmental planning",
-    "alex_category_id": "91375879"
-  },
-  {
-    "category_id": 214,
-    "category_name": "Intensive care medicine",
-    "alex_category_id": "177713679"
-  },
-  {
-    "category_id": 363,
-    "category_name": "Geomorphology",
-    "alex_category_id": "114793014"
-  },
-  {
     "category_id": 241,
-    "category_name": "Gynecology",
-    "alex_category_id": "29456083"
-  },
-  {
-    "category_id": 459,
-    "category_name": "Media studies",
-    "alex_category_id": "29595303"
-  },
-  {
-    "category_id": 210,
-    "category_name": "Internal medicine",
-    "alex_category_id": "126322002"
-  },
-  {
-    "category_id": 70,
-    "category_name": "Speech recognition",
-    "alex_category_id": "28490314"
-  },
-  {
-    "category_id": 104,
-    "category_name": "Electronic engineering",
-    "alex_category_id": "24326235"
-  },
-  {
-    "category_id": 107,
-    "category_name": "Mechanics",
-    "alex_category_id": "57879066"
-  },
-  {
-    "category_id": 649,
-    "category_name": "Environmental ethics",
-    "alex_category_id": "95124753"
-  },
-  {
-    "category_id": 161,
-    "category_name": "Atmospheric sciences",
-    "alex_category_id": "91586092"
-  },
-  {
-    "category_id": 577,
-    "category_name": "Actuarial science",
-    "alex_category_id": "162118730"
-  },
-  {
-    "category_id": 168,
-    "category_name": "Environmental chemistry",
-    "alex_category_id": "107872376"
-  },
-  {
-    "category_id": 160,
-    "category_name": "Meteorology",
-    "alex_category_id": "153294291"
-  },
-  {
-    "category_id": 441,
-    "category_name": "Orthodontics",
-    "alex_category_id": "29694066"
-  },
-  {
-    "category_id": 651,
-    "category_name": "Botany",
-    "alex_category_id": "59822182"
-  },
-  {
-    "category_id": 283,
-    "category_name": "Transport engineering",
-    "alex_category_id": "22212356"
-  },
-  {
-    "category_id": 416,
-    "category_name": "General surgery",
-    "alex_category_id": "61434518"
-  },
-  {
-    "category_id": 305,
-    "category_name": "Information retrieval",
-    "alex_category_id": "23123220"
-  },
-  {
-    "category_id": 412,
-    "category_name": "Dermatology",
-    "alex_category_id": "16005928"
-  },
-  {
-    "category_id": 201,
-    "category_name": "Surgery",
-    "alex_category_id": "141071460"
-  },
-  {
-    "category_id": 681,
-    "category_name": "Pure mathematics",
-    "alex_category_id": "202444582"
-  },
-  {
-    "category_id": 176,
-    "category_name": "Soil science",
-    "alex_category_id": "159390177"
-  },
-  {
-    "category_id": 277,
-    "category_name": "Knowledge management",
-    "alex_category_id": "56739046"
-  },
-  {
-    "category_id": 77,
-    "category_name": "Communication",
-    "alex_category_id": "46312422"
-  },
-  {
-    "category_id": 327,
-    "category_name": "Programming language",
-    "alex_category_id": "199360897"
-  },
-  {
-    "category_id": 121,
-    "category_name": "Nuclear engineering",
-    "alex_category_id": "116915560"
-  },
-  {
-    "category_id": 613,
-    "category_name": "Earth science",
-    "alex_category_id": "1965285"
-  },
-  {
-    "category_id": 522,
-    "category_name": "Electrical engineering",
-    "alex_category_id": "119599485"
-  },
-  {
-    "category_id": 353,
-    "category_name": "Paleontology",
-    "alex_category_id": "151730666"
-  },
-  {
-    "category_id": 354,
-    "category_name": "Geochemistry",
-    "alex_category_id": "17409809"
-  },
-  {
-    "category_id": 502,
-    "category_name": "Biological system",
-    "alex_category_id": "186060115"
-  },
-  {
-    "category_id": 3,
-    "category_name": "Humanities",
-    "alex_category_id": "15708023"
-  },
-  {
-    "category_id": 474,
-    "category_name": "Criminology",
-    "alex_category_id": "73484699"
-  },
-  {
-    "category_id": 464,
-    "category_name": "Mathematical economics",
-    "alex_category_id": "144237770"
-  },
-  {
-    "category_id": 270,
-    "category_name": "Natural resource economics",
-    "alex_category_id": "175605778"
-  },
-  {
-    "category_id": 11,
-    "category_name": "Psychoanalysis",
-    "alex_category_id": "11171543"
-  },
-  {
-    "category_id": 105,
-    "category_name": "Metallurgy",
-    "alex_category_id": "191897082"
-  },
-  {
-    "category_id": 16,
-    "category_name": "Computer security",
-    "alex_category_id": "38652104"
-  },
-  {
-    "category_id": 213,
-    "category_name": "Radiology",
-    "alex_category_id": "126838900"
-  },
-  {
-    "category_id": 100,
-    "category_name": "Combinatorics",
-    "alex_category_id": "114614502"
-  },
-  {
-    "category_id": 101,
-    "category_name": "Optics",
-    "alex_category_id": "120665830"
-  },
-  {
-    "category_id": 499,
-    "category_name": "Development economics",
-    "alex_category_id": "47768531"
-  },
-  {
-    "category_id": 392,
-    "category_name": "Cartography",
-    "alex_category_id": "58640448"
-  },
-  {
-    "category_id": 645,
-    "category_name": "Mineralogy",
-    "alex_category_id": "199289684"
-  },
-  {
-    "category_id": 369,
-    "category_name": "Oceanography",
-    "alex_category_id": "111368507"
-  },
-  {
-    "category_id": 185,
-    "category_name": "World Wide Web",
-    "alex_category_id": "136764020"
-  },
-  {
-    "category_id": 491,
-    "category_name": "Gender studies",
-    "alex_category_id": "107993555"
-  },
-  {
-    "category_id": 224,
-    "category_name": "Cell biology",
-    "alex_category_id": "95444343"
-  },
-  {
-    "category_id": 563,
-    "category_name": "Medical education",
-    "alex_category_id": "509550671"
-  },
-  {
-    "category_id": 458,
-    "category_name": "Law",
-    "alex_category_id": "199539241"
-  },
-  {
-    "category_id": 253,
-    "category_name": "Climatology",
-    "alex_category_id": "49204034"
-  },
-  {
-    "category_id": 14,
-    "category_name": "Anthropology",
-    "alex_category_id": "19165224"
-  },
-  {
-    "category_id": 604,
-    "category_name": "Astrobiology",
-    "alex_category_id": "87355193"
-  },
-  {
-    "category_id": 510,
-    "category_name": "Automotive engineering",
-    "alex_category_id": "171146098"
-  },
-  {
-    "category_id": 111,
-    "category_name": "Optoelectronics",
-    "alex_category_id": "49040817"
-  },
-  {
-    "category_id": 124,
-    "category_name": "Biomedical engineering",
-    "alex_category_id": "136229726"
-  },
-  {
-    "category_id": 133,
-    "category_name": "Linguistics",
-    "alex_category_id": "41895202"
-  },
-  {
-    "category_id": 526,
-    "category_name": "Systems engineering",
-    "alex_category_id": "201995342"
-  },
-  {
-    "category_id": 503,
-    "category_name": "Mechanical engineering",
-    "alex_category_id": "78519656"
-  },
-  {
-    "category_id": 132,
-    "category_name": "Remote sensing",
-    "alex_category_id": "62649853"
-  },
-  {
-    "category_id": 351,
-    "category_name": "Physical geography",
-    "alex_category_id": "100970517"
-  },
-  {
-    "category_id": 493,
-    "category_name": "Ancient history",
-    "alex_category_id": "195244886"
-  },
-  {
-    "category_id": 78,
-    "category_name": "Computer vision",
-    "alex_category_id": "31972630"
-  },
-  {
-    "category_id": 196,
-    "category_name": "Seismology",
-    "alex_category_id": "165205528"
-  },
-  {
-    "category_id": 691,
-    "category_name": "Traditional medicine",
-    "alex_category_id": "556039675"
-  },
-  {
-    "category_id": 109,
-    "category_name": "Atomic physics",
-    "alex_category_id": "184779094"
-  },
-  {
-    "category_id": 221,
-    "category_name": "Immunology",
-    "alex_category_id": "203014093"
-  },
-  {
-    "category_id": 189,
-    "category_name": "Environmental protection",
-    "alex_category_id": "526734887"
-  },
-  {
-    "category_id": 71,
-    "category_name": "Control engineering",
-    "alex_category_id": "133731056"
-  },
-  {
-    "category_id": 219,
-    "category_name": "Cancer research",
-    "alex_category_id": "502942594"
-  },
-  {
-    "category_id": 469,
-    "category_name": "Public administration",
-    "alex_category_id": "3116431"
-  },
-  {
-    "category_id": 571,
-    "category_name": "Nursing",
-    "alex_category_id": "159110408"
-  },
-  {
-    "category_id": 515,
-    "category_name": "Waste management",
-    "alex_category_id": "548081761"
-  },
-  {
-    "category_id": 614,
-    "category_name": "Astronomy",
-    "alex_category_id": "1276947"
-  },
-  {
-    "category_id": 489,
-    "category_name": "Management",
-    "alex_category_id": "187736073"
-  },
-  {
-    "category_id": 480,
-    "category_name": "Social psychology",
-    "alex_category_id": "77805123"
-  },
-  {
-    "category_id": 53,
-    "category_name": "Public relations",
-    "alex_category_id": "39549134"
-  },
-  {
-    "category_id": 202,
-    "category_name": "Oncology",
-    "alex_category_id": "143998085"
-  },
-  {
-    "category_id": 657,
-    "category_name": "Food science",
-    "alex_category_id": "31903555"
-  },
-  {
-    "category_id": 102,
-    "category_name": "Aesthetics",
-    "alex_category_id": "107038049"
-  },
-  {
-    "category_id": 562,
-    "category_name": "Pedagogy",
-    "alex_category_id": "19417346"
-  },
-  {
-    "category_id": 338,
-    "category_name": "Operating system",
-    "alex_category_id": "111919701"
-  },
-  {
-    "category_id": 626,
-    "category_name": "Archaeology",
-    "alex_category_id": "166957645"
-  },
-  {
-    "category_id": 473,
-    "category_name": "Law and economics",
-    "alex_category_id": "190253527"
-  },
-  {
-    "category_id": 675,
-    "category_name": "Agronomy",
-    "alex_category_id": "6557445"
-  },
-  {
-    "category_id": 263,
-    "category_name": "Water resource management",
-    "alex_category_id": "524765639"
-  },
-  {
-    "category_id": 81,
-    "category_name": "Database",
-    "alex_category_id": "77088390"
-  },
-  {
-    "category_id": 64,
-    "category_name": "Human–computer interaction",
-    "alex_category_id": "107457646"
-  },
-  {
-    "category_id": 207,
-    "category_name": "Biochemistry",
-    "alex_category_id": "55493867"
-  },
-  {
-    "category_id": 59,
-    "category_name": "Algorithm",
-    "alex_category_id": "11413529"
-  },
-  {
-    "category_id": 103,
-    "category_name": "Nuclear physics",
-    "alex_category_id": "185544564"
-  },
-  {
-    "category_id": 429,
-    "category_name": "Physical medicine and rehabilitation",
-    "alex_category_id": "99508421"
-  },
-  {
-    "category_id": 708,
-    "category_name": "Genetics",
-    "alex_category_id": "54355233"
-  },
-  {
-    "category_id": 1191,
-    "category_name": "Obstetrics",
-    "alex_category_id": "131872663"
-  },
-  {
-    "category_id": 845,
-    "category_name": "Statistical physics",
-    "alex_category_id": "121864883"
-  },
-  {
-    "category_id": 3998,
-    "category_name": "Psychotherapist",
-    "alex_category_id": "542102704"
-  },
-  {
-    "category_id": 706,
-    "category_name": "Molecular biology",
-    "alex_category_id": "153911025"
-  },
-  {
-    "category_id": 1950,
-    "category_name": "Thermodynamics",
-    "alex_category_id": "97355855"
-  },
-  {
-    "category_id": 4508,
-    "category_name": "Geometry",
-    "alex_category_id": "2524010"
-  },
-  {
-    "category_id": 3236,
-    "category_name": "Environmental health",
-    "alex_category_id": "99454951"
-  },
-  {
-    "category_id": 851,
-    "category_name": "Evolutionary biology",
-    "alex_category_id": "78458016"
-  },
-  {
-    "category_id": 3054,
-    "category_name": "Computational chemistry",
-    "alex_category_id": "147597530"
-  },
-  {
-    "category_id": 1043,
-    "category_name": "Natural language processing",
-    "alex_category_id": "204321447"
-  },
-  {
-    "category_id": 914,
-    "category_name": "Developmental psychology",
-    "alex_category_id": "138496976"
-  },
-  {
-    "category_id": 2942,
-    "category_name": "Machine learning",
-    "alex_category_id": "119857082"
-  },
-  {
-    "category_id": 3264,
-    "category_name": "Internet privacy",
-    "alex_category_id": "108827166"
-  },
-  {
-    "category_id": 4891,
-    "category_name": "Mathematical analysis",
-    "alex_category_id": "134306372"
-  },
-  {
-    "category_id": 2462,
-    "category_name": "Industrial organization",
-    "alex_category_id": "40700"
-  },
-  {
-    "category_id": 2392,
-    "category_name": "Organic chemistry",
-    "alex_category_id": "178790620"
-  },
-  {
-    "category_id": 2926,
-    "category_name": "Computational science",
-    "alex_category_id": "459310"
-  },
-  {
-    "category_id": 1302,
-    "category_name": "Chemical physics",
-    "alex_category_id": "159467904"
-  },
-  {
-    "category_id": 2358,
-    "category_name": "Inorganic chemistry",
-    "alex_category_id": "179104552"
-  },
-  {
-    "category_id": 2016,
-    "category_name": "Emergency medicine",
-    "alex_category_id": "194828623"
-  },
-  {
-    "category_id": 2633,
-    "category_name": "Simulation",
-    "alex_category_id": "44154836"
-  },
-  {
-    "category_id": 868,
-    "category_name": "Forestry",
-    "alex_category_id": "97137747"
-  },
-  {
-    "category_id": 952,
-    "category_name": "Art history",
-    "alex_category_id": "52119013"
-  },
-  {
-    "category_id": 3630,
-    "category_name": "Photochemistry",
-    "alex_category_id": "75473681"
-  },
-  {
-    "category_id": 2470,
-    "category_name": "Public economics",
-    "alex_category_id": "100001284"
-  },
-  {
-    "category_id": 810,
-    "category_name": "Virology",
-    "alex_category_id": "159047783"
-  },
-  {
-    "category_id": 1435,
-    "category_name": "Mathematical optimization",
-    "alex_category_id": "126255220"
-  },
-  {
-    "category_id": 2069,
-    "category_name": "Agroforestry",
-    "alex_category_id": "54286561"
-  },
-  {
-    "category_id": 4221,
-    "category_name": "Computer network",
-    "alex_category_id": "31258907"
-  },
-  {
-    "category_id": 1392,
-    "category_name": "Cognitive science",
-    "alex_category_id": "188147891"
-  },
-  {
-    "category_id": 3392,
-    "category_name": "Economic system",
-    "alex_category_id": "74363100"
-  },
-  {
-    "category_id": 455,
-    "category_name": "Theoretical physics",
-    "alex_category_id": "33332235"
-  },
-  {
-    "category_id": 2451,
-    "category_name": "Financial economics",
-    "alex_category_id": "106159729"
-  },
-  {
-    "category_id": 1148,
-    "category_name": "Applied mathematics",
-    "alex_category_id": "28826006"
-  },
-  {
-    "category_id": 2037,
-    "category_name": "Pediatrics",
-    "alex_category_id": "187212893"
-  },
-  {
-    "category_id": 789,
-    "category_name": "Biophysics",
-    "alex_category_id": "12554922"
-  },
-  {
-    "category_id": 3106,
-    "category_name": "Engineering management",
-    "alex_category_id": "110354214"
-  },
-  {
-    "category_id": 3385,
-    "category_name": "International trade",
-    "alex_category_id": "155202549"
-  },
-  {
-    "category_id": 2883,
-    "category_name": "Aeronautics",
-    "alex_category_id": "178802073"
-  },
-  {
-    "category_id": 2346,
-    "category_name": "Biotechnology",
-    "alex_category_id": "150903083"
-  },
-  {
-    "category_id": 2208,
-    "category_name": "Animal science",
-    "alex_category_id": "140793950"
-  },
-  {
-    "category_id": 2564,
-    "category_name": "Medical emergency",
-    "alex_category_id": "545542383"
-  },
-  {
-    "category_id": 2865,
-    "category_name": "Business administration",
-    "alex_category_id": "178550888"
-  },
-  {
-    "category_id": 2485,
-    "category_name": "Labour economics",
-    "alex_category_id": "145236788"
-  },
-  {
-    "category_id": 544,
-    "category_name": "Aerospace engineering",
-    "alex_category_id": "146978453"
-  },
-  {
-    "category_id": 1605,
-    "category_name": "Ethnology",
-    "alex_category_id": "2549261"
-  },
-  {
-    "category_id": 1056,
-    "category_name": "Economic growth",
-    "alex_category_id": "50522688"
-  },
-  {
-    "category_id": 1581,
-    "category_name": "Economic policy",
-    "alex_category_id": "105639569"
-  },
-  {
-    "category_id": 2020,
-    "category_name": "Psychiatry",
-    "alex_category_id": "118552586"
-  },
-  {
-    "category_id": 849,
-    "category_name": "Biochemical engineering",
-    "alex_category_id": "183696295"
-  },
-  {
-    "category_id": 1205,
-    "category_name": "Religious studies",
-    "alex_category_id": "24667770"
-  },
-  {
-    "category_id": 4208,
-    "category_name": "Computer hardware",
-    "alex_category_id": "9390403"
-  },
-  {
-    "category_id": 3528,
-    "category_name": "Manufacturing engineering",
-    "alex_category_id": "117671659"
-  },
-  {
-    "category_id": 1608,
-    "category_name": "Visual arts",
-    "alex_category_id": "153349607"
-  },
-  {
-    "category_id": 737,
-    "category_name": "Pathology",
-    "alex_category_id": "142724271"
-  },
-  {
-    "category_id": 821,
-    "category_name": "Microbiology",
-    "alex_category_id": "89423630"
-  },
-  {
-    "category_id": 1105,
-    "category_name": "Demography",
-    "alex_category_id": "149923435"
-  },
-  {
-    "category_id": 4473,
-    "category_name": "Dentistry",
-    "alex_category_id": "199343813"
-  },
-  {
-    "category_id": 1182,
-    "category_name": "Gerontology",
-    "alex_category_id": "74909509"
-  },
-  {
-    "category_id": 2994,
-    "category_name": "Computational physics",
-    "alex_category_id": "30475298"
-  },
-  {
-    "category_id": 1282,
-    "category_name": "Physiology",
-    "alex_category_id": "42407357"
-  },
-  {
-    "category_id": 733,
-    "category_name": "Nanotechnology",
-    "alex_category_id": "171250308"
-  },
-  {
-    "category_id": 1352,
-    "category_name": "Process management",
-    "alex_category_id": "195094911"
-  },
-  {
-    "category_id": 1533,
-    "category_name": "Discrete mathematics",
-    "alex_category_id": "118615104"
-  },
-  {
-    "category_id": 2046,
-    "category_name": "Anesthesia",
-    "alex_category_id": "42219234"
-  },
-  {
-    "category_id": 4308,
-    "category_name": "Genealogy",
-    "alex_category_id": "53553401"
-  },
-  {
-    "category_id": 4642,
-    "category_name": "Agricultural science",
-    "alex_category_id": "37621935"
-  },
-  {
-    "category_id": 4376,
-    "category_name": "Welfare economics",
-    "alex_category_id": "549774020"
-  },
-  {
-    "category_id": 826,
-    "category_name": "Pharmacology",
-    "alex_category_id": "98274493"
-  },
-  {
-    "category_id": 2458,
-    "category_name": "Accounting",
-    "alex_category_id": "121955636"
-  },
-  {
-    "category_id": 1902,
-    "category_name": "Chemical engineering",
-    "alex_category_id": "42360764"
-  },
-  {
-    "category_id": 4894,
-    "category_name": "Geodesy",
-    "alex_category_id": "13280743"
-  },
-  {
-    "category_id": 839,
-    "category_name": "Chromatography",
-    "alex_category_id": "43617362"
-  },
-  {
-    "category_id": 3165,
-    "category_name": "Economic history",
-    "alex_category_id": "6303427"
-  },
-  {
-    "category_id": 2965,
-    "category_name": "Nuclear medicine",
-    "alex_category_id": "2989005"
-  },
-  {
-    "category_id": 3964,
-    "category_name": "Clinical psychology",
-    "alex_category_id": "70410870"
-  },
-  {
-    "category_id": 1304,
-    "category_name": "Quantum mechanics",
-    "alex_category_id": "62520636"
-  },
-  {
-    "category_id": 4361,
-    "category_name": "Engineering drawing",
-    "alex_category_id": "199639397"
-  },
-  {
-    "category_id": 1128,
     "category_name": "Medical physics",
     "alex_category_id": "19527891"
   },
   {
-    "category_id": 3382,
-    "category_name": "Forensic engineering",
-    "alex_category_id": "77595967"
+    "category_id": 67,
+    "category_name": "Human–computer interaction",
+    "alex_category_id": "107457646"
   },
   {
-    "category_id": 1733,
+    "category_id": 447,
+    "category_name": "Engineering ethics",
+    "alex_category_id": "55587333"
+  },
+  {
+    "category_id": 59,
+    "category_name": "Applied mathematics",
+    "alex_category_id": "28826006"
+  },
+  {
+    "category_id": 220,
     "category_name": "Anatomy",
     "alex_category_id": "105702510"
   },
   {
-    "category_id": 1278,
-    "category_name": "Bioinformatics",
-    "alex_category_id": "60644358"
+    "category_id": 69,
+    "category_name": "Neuroscience",
+    "alex_category_id": "169760540"
   },
   {
-    "category_id": 1769,
-    "category_name": "Fishery",
-    "alex_category_id": "505870484"
+    "category_id": 456,
+    "category_name": "Law",
+    "alex_category_id": "199539241"
   },
   {
-    "category_id": 4533,
-    "category_name": "Audiology",
-    "alex_category_id": "548259974"
+    "category_id": 465,
+    "category_name": "Economic geography",
+    "alex_category_id": "26271046"
   },
   {
-    "category_id": 2906,
-    "category_name": "Engineering physics",
-    "alex_category_id": "61696701"
-  },
-  {
-    "category_id": 3901,
-    "category_name": "Petroleum engineering",
-    "alex_category_id": "78762247"
-  },
-  {
-    "category_id": 915,
+    "category_id": 459,
     "category_name": "Mathematics education",
     "alex_category_id": "145420912"
   },
   {
-    "category_id": 4502,
-    "category_name": "Geotechnical engineering",
-    "alex_category_id": "187320778"
+    "category_id": 468,
+    "category_name": "Communication",
+    "alex_category_id": "46312422"
   },
   {
-    "category_id": 1201,
-    "category_name": "Theology",
-    "alex_category_id": "27206212"
+    "category_id": 166,
+    "category_name": "Oceanography",
+    "alex_category_id": "111368507"
   },
   {
-    "category_id": 2459,
-    "category_name": "Finance",
-    "alex_category_id": "10138342"
+    "category_id": 83,
+    "category_name": "Software engineering",
+    "alex_category_id": "115903868"
   },
   {
-    "category_id": 1305,
-    "category_name": "Condensed matter physics",
-    "alex_category_id": "26873012"
+    "category_id": 35,
+    "category_name": "Developmental psychology",
+    "alex_category_id": "138496976"
   },
   {
-    "category_id": 3730,
-    "category_name": "Reliability engineering",
-    "alex_category_id": "200601418"
+    "category_id": 313,
+    "category_name": "Database",
+    "alex_category_id": "77088390"
   },
   {
-    "category_id": 4336,
-    "category_name": "Architectural engineering",
-    "alex_category_id": "170154142"
+    "category_id": 187,
+    "category_name": "Aeronautics",
+    "alex_category_id": "178802073"
   },
   {
-    "category_id": 922,
-    "category_name": "Cognitive psychology",
-    "alex_category_id": "180747234"
-  },
-  {
-    "category_id": 1021,
+    "category_id": 22,
     "category_name": "Library science",
     "alex_category_id": "161191863"
   },
   {
-    "category_id": 3456,
-    "category_name": "Socioeconomics",
-    "alex_category_id": "45355965"
+    "category_id": 3,
+    "category_name": "Literature",
+    "alex_category_id": "124952713"
   },
   {
-    "category_id": 678,
-    "category_name": "Horticulture",
-    "alex_category_id": "144027150"
+    "category_id": 275,
+    "category_name": "Natural resource economics",
+    "alex_category_id": "175605778"
   },
   {
-    "category_id": 2952,
-    "category_name": "Nuclear magnetic resonance",
-    "alex_category_id": "46141821"
+    "category_id": 283,
+    "category_name": "Industrial organization",
+    "alex_category_id": "40700"
   },
   {
-    "category_id": 971,
-    "category_name": "Classics",
-    "alex_category_id": "74916050"
+    "category_id": 215,
+    "category_name": "Environmental health",
+    "alex_category_id": "99454951"
   },
   {
-    "category_id": 2693,
-    "category_name": "Computer graphics (images)",
-    "alex_category_id": "121684516"
+    "category_id": 321,
+    "category_name": "Epistemology",
+    "alex_category_id": "111472728"
   },
   {
-    "category_id": 3149,
-    "category_name": "Operations research",
-    "alex_category_id": "42475967"
+    "category_id": 159,
+    "category_name": "Geomorphology",
+    "alex_category_id": "114793014"
   },
   {
-    "category_id": 1688,
-    "category_name": "Operations management",
-    "alex_category_id": "21547014"
+    "category_id": 70,
+    "category_name": "Archaeology",
+    "alex_category_id": "166957645"
   },
   {
-    "category_id": 3065,
-    "category_name": "Stereochemistry",
-    "alex_category_id": "71240020"
+    "category_id": 115,
+    "category_name": "Mechanical engineering",
+    "alex_category_id": "78519656"
   },
   {
-    "category_id": 2071,
-    "category_name": "Pulp and paper industry",
-    "alex_category_id": "528095902"
+    "category_id": 123,
+    "category_name": "Oncology",
+    "alex_category_id": "143998085"
   },
   {
-    "category_id": 1112,
-    "category_name": "Statistics",
-    "alex_category_id": "105795698"
+    "category_id": 150,
+    "category_name": "Internal medicine",
+    "alex_category_id": "126322002"
   },
   {
-    "category_id": 955,
-    "category_name": "Acoustics",
-    "alex_category_id": "24890656"
+    "category_id": 136,
+    "category_name": "Crystallography",
+    "alex_category_id": "8010536"
   },
   {
-    "category_id": 1841,
-    "category_name": "Multimedia",
-    "alex_category_id": "49774154"
+    "category_id": 120,
+    "category_name": "Mechanics",
+    "alex_category_id": "57879066"
   },
   {
-    "category_id": 2300,
-    "category_name": "Civil engineering",
-    "alex_category_id": "147176958"
+    "category_id": 156,
+    "category_name": "Remote sensing",
+    "alex_category_id": "62649853"
   },
   {
-    "category_id": 3059,
-    "category_name": "Polymer chemistry",
-    "alex_category_id": "188027245"
+    "category_id": 82,
+    "category_name": "Cognitive psychology",
+    "alex_category_id": "180747234"
   },
   {
-    "category_id": 4878,
-    "category_name": "Classical mechanics",
-    "alex_category_id": "74650414"
+    "category_id": 45,
+    "category_name": "Medical education",
+    "alex_category_id": "509550671"
   },
   {
-    "category_id": 1919,
-    "category_name": "Structural engineering",
-    "alex_category_id": "66938386"
-  },
-  {
-    "category_id": 1114,
-    "category_name": "Agricultural engineering",
-    "alex_category_id": "88463610"
-  },
-  {
-    "category_id": 739,
-    "category_name": "Nuclear chemistry",
-    "alex_category_id": "13965031"
-  },
-  {
-    "category_id": 1519,
-    "category_name": "Real-time computing",
-    "alex_category_id": "79403827"
-  },
-  {
-    "category_id": 814,
-    "category_name": "Combinatorial chemistry",
-    "alex_category_id": "21951064"
-  },
-  {
-    "category_id": 1813,
-    "category_name": "Family medicine",
-    "alex_category_id": "512399662"
-  },
-  {
-    "category_id": 1637,
-    "category_name": "Social science",
-    "alex_category_id": "36289849"
-  },
-  {
-    "category_id": 802,
-    "category_name": "Telecommunications",
-    "alex_category_id": "76155785"
-  },
-  {
-    "category_id": 3393,
-    "category_name": "Keynesian economics",
-    "alex_category_id": "165556158"
-  },
-  {
-    "category_id": 930,
-    "category_name": "Applied psychology",
-    "alex_category_id": "75630572"
-  },
-  {
-    "category_id": 3217,
-    "category_name": "Demographic economics",
-    "alex_category_id": "4249254"
-  },
-  {
-    "category_id": 8791,
-    "category_name": "Physical chemistry",
-    "alex_category_id": "147789679"
-  },
-  {
-    "category_id": 10481,
-    "category_name": "Molecular physics",
-    "alex_category_id": "41999313"
-  },
-  {
-    "category_id": 8155,
-    "category_name": "Construction engineering",
-    "alex_category_id": "107053488"
-  },
-  {
-    "category_id": 5887,
-    "category_name": "Market economy",
-    "alex_category_id": "34447519"
-  },
-  {
-    "category_id": 5990,
-    "category_name": "Gastroenterology",
-    "alex_category_id": "90924648"
-  },
-  {
-    "category_id": 10954,
-    "category_name": "Veterinary medicine",
-    "alex_category_id": "42972112"
-  },
-  {
-    "category_id": 5070,
-    "category_name": "Agricultural economics",
-    "alex_category_id": "48824518"
-  },
-  {
-    "category_id": 10313,
-    "category_name": "Macroeconomics",
-    "alex_category_id": "139719470"
-  },
-  {
-    "category_id": 13605,
-    "category_name": "Radiochemistry",
-    "alex_category_id": "177322064"
-  },
-  {
-    "category_id": 12102,
-    "category_name": "Andrology",
-    "alex_category_id": "16685009"
-  },
-  {
-    "category_id": 9877,
-    "category_name": "Quantum electrodynamics",
-    "alex_category_id": "3079626"
-  },
-  {
-    "category_id": 14088,
-    "category_name": "Computer engineering",
-    "alex_category_id": "113775141"
-  },
-  {
-    "category_id": 11665,
-    "category_name": "Financial system",
-    "alex_category_id": "73283319"
-  },
-  {
-    "category_id": 7085,
-    "category_name": "Astrophysics",
-    "alex_category_id": "44870925"
-  },
-  {
-    "category_id": 8657,
-    "category_name": "Distributed computing",
-    "alex_category_id": "120314980"
-  },
-  {
-    "category_id": 12220,
-    "category_name": "International economics",
-    "alex_category_id": "18547055"
-  },
-  {
-    "category_id": 9522,
-    "category_name": "Toxicology",
-    "alex_category_id": "33070731"
-  },
-  {
-    "category_id": 7044,
+    "category_id": 162,
     "category_name": "Embedded system",
     "alex_category_id": "149635348"
   },
   {
-    "category_id": 13769,
-    "category_name": "Industrial engineering",
-    "alex_category_id": "13736549"
+    "category_id": 189,
+    "category_name": "Nuclear magnetic resonance",
+    "alex_category_id": "46141821"
   },
   {
-    "category_id": 5996,
-    "category_name": "Urology",
-    "alex_category_id": "126894567"
+    "category_id": 106,
+    "category_name": "Nanotechnology",
+    "alex_category_id": "171250308"
   },
   {
-    "category_id": 13817,
-    "category_name": "Polymer science",
-    "alex_category_id": "126348684"
+    "category_id": 39,
+    "category_name": "Mathematical economics",
+    "alex_category_id": "144237770"
   },
   {
-    "category_id": 5515,
-    "category_name": "Mathematical physics",
-    "alex_category_id": "37914503"
+    "category_id": 80,
+    "category_name": "Computational biology",
+    "alex_category_id": "70721500"
   },
   {
-    "category_id": 5011,
-    "category_name": "Particle physics",
-    "alex_category_id": "109214941"
+    "category_id": 66,
+    "category_name": "Theology",
+    "alex_category_id": "27206212"
   },
   {
-    "category_id": 12664,
-    "category_name": "Computer architecture",
-    "alex_category_id": "118524514"
+    "category_id": 248,
+    "category_name": "Pediatrics",
+    "alex_category_id": "187212893"
   },
   {
-    "category_id": 6239,
-    "category_name": "Arithmetic",
-    "alex_category_id": "94375191"
+    "category_id": 470,
+    "category_name": "Economic history",
+    "alex_category_id": "6303427"
   },
   {
-    "category_id": 4911,
+    "category_id": 212,
+    "category_name": "Immunology",
+    "alex_category_id": "203014093"
+  },
+  {
+    "category_id": 57,
+    "category_name": "Statistical physics",
+    "alex_category_id": "121864883"
+  },
+  {
+    "category_id": 306,
+    "category_name": "Data science",
+    "alex_category_id": "2522767166"
+  },
+  {
+    "category_id": 103,
+    "category_name": "Architectural engineering",
+    "alex_category_id": "170154142"
+  },
+  {
+    "category_id": 113,
+    "category_name": "Acoustics",
+    "alex_category_id": "24890656"
+  },
+  {
+    "category_id": 315,
+    "category_name": "Structural engineering",
+    "alex_category_id": "66938386"
+  },
+  {
+    "category_id": 170,
+    "category_name": "Climatology",
+    "alex_category_id": "49204034"
+  },
+  {
+    "category_id": 107,
+    "category_name": "Process management",
+    "alex_category_id": "195094911"
+  },
+  {
+    "category_id": 110,
+    "category_name": "Environmental resource management",
+    "alex_category_id": "107826830"
+  },
+  {
+    "category_id": 86,
+    "category_name": "Algorithm",
+    "alex_category_id": "11413529"
+  },
+  {
+    "category_id": 496,
+    "category_name": "Economic system",
+    "alex_category_id": "74363100"
+  },
+  {
+    "category_id": 116,
+    "category_name": "Engineering physics",
+    "alex_category_id": "61696701"
+  },
+  {
+    "category_id": 32,
+    "category_name": "Criminology",
+    "alex_category_id": "73484699"
+  },
+  {
+    "category_id": 214,
+    "category_name": "Cardiology",
+    "alex_category_id": "164705383"
+  },
+  {
+    "category_id": 99,
+    "category_name": "Econometrics",
+    "alex_category_id": "149782125"
+  },
+  {
+    "category_id": 37,
+    "category_name": "Art history",
+    "alex_category_id": "52119013"
+  },
+  {
+    "category_id": 142,
+    "category_name": "Information retrieval",
+    "alex_category_id": "23123220"
+  },
+  {
+    "category_id": 311,
+    "category_name": "Computer security",
+    "alex_category_id": "38652104"
+  },
+  {
+    "category_id": 43,
+    "category_name": "Media studies",
+    "alex_category_id": "29595303"
+  },
+  {
+    "category_id": 173,
+    "category_name": "Astronomy",
+    "alex_category_id": "1276947"
+  },
+  {
+    "category_id": 148,
+    "category_name": "Condensed matter physics",
+    "alex_category_id": "26873012"
+  },
+  {
+    "category_id": 374,
+    "category_name": "Mineralogy",
+    "alex_category_id": "199289684"
+  },
+  {
+    "category_id": 152,
+    "category_name": "Meteorology",
+    "alex_category_id": "153294291"
+  },
+  {
+    "category_id": 42,
+    "category_name": "Social psychology",
+    "alex_category_id": "77805123"
+  },
+  {
+    "category_id": 353,
+    "category_name": "Physical geography",
+    "alex_category_id": "100970517"
+  },
+  {
+    "category_id": 269,
     "category_name": "Environmental engineering",
     "alex_category_id": "87717796"
   },
   {
-    "category_id": 12776,
-    "category_name": "Parallel computing",
-    "alex_category_id": "173608175"
+    "category_id": 230,
+    "category_name": "Psychiatry",
+    "alex_category_id": "118552586"
   },
   {
-    "category_id": 10332,
-    "category_name": "Microeconomics",
-    "alex_category_id": "175444787"
+    "category_id": 114,
+    "category_name": "Optoelectronics",
+    "alex_category_id": "49040817"
   },
   {
-    "category_id": 9406,
-    "category_name": "Mining engineering",
-    "alex_category_id": "16674752"
+    "category_id": 139,
+    "category_name": "Biophysics",
+    "alex_category_id": "12554922"
   },
   {
-    "category_id": 14029,
-    "category_name": "Neoclassical economics",
-    "alex_category_id": "133425853"
+    "category_id": 247,
+    "category_name": "Urology",
+    "alex_category_id": "126894567"
   },
   {
-    "category_id": 2005,
+    "category_id": 72,
+    "category_name": "Statistics",
+    "alex_category_id": "105795698"
+  },
+  {
+    "category_id": 218,
+    "category_name": "Virology",
+    "alex_category_id": "159047783"
+  },
+  {
+    "category_id": 60,
+    "category_name": "Regional science",
+    "alex_category_id": "148383697"
+  },
+  {
+    "category_id": 338,
+    "category_name": "Computational science",
+    "alex_category_id": "459310"
+  },
+  {
+    "category_id": 153,
+    "category_name": "Forestry",
+    "alex_category_id": "97137747"
+  },
+  {
+    "category_id": 207,
+    "category_name": "Nuclear medicine",
+    "alex_category_id": "2989005"
+  },
+  {
+    "category_id": 464,
+    "category_name": "Economic growth",
+    "alex_category_id": "50522688"
+  },
+  {
+    "category_id": 210,
+    "category_name": "Public relations",
+    "alex_category_id": "39549134"
+  },
+  {
+    "category_id": 264,
     "category_name": "Risk analysis (engineering)",
     "alex_category_id": "112930515"
   },
   {
-    "category_id": 8534,
-    "category_name": "Positive economics",
-    "alex_category_id": "118084267"
+    "category_id": 95,
+    "category_name": "Evolutionary biology",
+    "alex_category_id": "78458016"
   },
   {
-    "category_id": 14154,
-    "category_name": "Classical economics",
-    "alex_category_id": "167562979"
+    "category_id": 85,
+    "category_name": "Computer graphics (images)",
+    "alex_category_id": "121684516"
   },
   {
-    "category_id": 6179,
-    "category_name": "Monetary economics",
-    "alex_category_id": "556758197"
+    "category_id": 131,
+    "category_name": "Photochemistry",
+    "alex_category_id": "75473681"
   },
   {
-    "category_id": 11078,
-    "category_name": "Commerce",
-    "alex_category_id": "54750564"
+    "category_id": 202,
+    "category_name": "Surgery",
+    "alex_category_id": "141071460"
   },
   {
-    "category_id": 6089,
-    "category_name": "Marine engineering",
-    "alex_category_id": "199104240"
+    "category_id": 201,
+    "category_name": "General surgery",
+    "alex_category_id": "61434518"
   },
   {
-    "category_id": 7674,
-    "category_name": "Medicinal chemistry",
-    "alex_category_id": "155647269"
+    "category_id": 124,
+    "category_name": "Classical mechanics",
+    "alex_category_id": "74650414"
   },
   {
-    "category_id": 5465,
+    "category_id": 206,
+    "category_name": "Food science",
+    "alex_category_id": "31903555"
+  },
+  {
+    "category_id": 1,
+    "category_name": "Humanities",
+    "alex_category_id": "15708023"
+  },
+  {
+    "category_id": 388,
+    "category_name": "Water resource management",
+    "alex_category_id": "524765639"
+  },
+  {
+    "category_id": 34,
+    "category_name": "Gynecology",
+    "alex_category_id": "29456083"
+  },
+  {
+    "category_id": 122,
+    "category_name": "Demography",
+    "alex_category_id": "149923435"
+  },
+  {
+    "category_id": 455,
+    "category_name": "Law and economics",
+    "alex_category_id": "190253527"
+  },
+  {
+    "category_id": 140,
+    "category_name": "Machine learning",
+    "alex_category_id": "119857082"
+  },
+  {
+    "category_id": 125,
+    "category_name": "Mathematical analysis",
+    "alex_category_id": "134306372"
+  },
+  {
+    "category_id": 428,
+    "category_name": "Physical therapy",
+    "alex_category_id": "1862650"
+  },
+  {
+    "category_id": 463,
+    "category_name": "Public administration",
+    "alex_category_id": "3116431"
+  },
+  {
+    "category_id": 101,
+    "category_name": "Nuclear physics",
+    "alex_category_id": "185544564"
+  },
+  {
+    "category_id": 479,
+    "category_name": "Clinical psychology",
+    "alex_category_id": "70410870"
+  },
+  {
+    "category_id": 129,
+    "category_name": "Thermodynamics",
+    "alex_category_id": "97355855"
+  },
+  {
+    "category_id": 74,
+    "category_name": "Data mining",
+    "alex_category_id": "124101348"
+  },
+  {
+    "category_id": 381,
+    "category_name": "Soil science",
+    "alex_category_id": "159390177"
+  },
+  {
+    "category_id": 410,
+    "category_name": "Anesthesia",
+    "alex_category_id": "42219234"
+  },
+  {
+    "category_id": 165,
+    "category_name": "Geodesy",
+    "alex_category_id": "13280743"
+  },
+  {
+    "category_id": 217,
+    "category_name": "Family medicine",
+    "alex_category_id": "512399662"
+  },
+  {
+    "category_id": 52,
+    "category_name": "Engineering management",
+    "alex_category_id": "110354214"
+  },
+  {
+    "category_id": 64,
+    "category_name": "Management science",
+    "alex_category_id": "539667460"
+  },
+  {
+    "category_id": 365,
+    "category_name": "Atmospheric sciences",
+    "alex_category_id": "91586092"
+  },
+  {
+    "category_id": 203,
+    "category_name": "Endocrinology",
+    "alex_category_id": "134018914"
+  },
+  {
+    "category_id": 251,
+    "category_name": "Environmental economics",
+    "alex_category_id": "134560507"
+  },
+  {
+    "category_id": 104,
+    "category_name": "Optics",
+    "alex_category_id": "120665830"
+  },
+  {
+    "category_id": 5,
+    "category_name": "Advertising",
+    "alex_category_id": "112698675"
+  },
+  {
+    "category_id": 462,
+    "category_name": "Public economics",
+    "alex_category_id": "100001284"
+  },
+  {
+    "category_id": 63,
+    "category_name": "Mathematical optimization",
+    "alex_category_id": "126255220"
+  },
+  {
+    "category_id": 141,
+    "category_name": "Gerontology",
+    "alex_category_id": "74909509"
+  },
+  {
+    "category_id": 209,
+    "category_name": "Intensive care medicine",
+    "alex_category_id": "177713679"
+  },
+  {
+    "category_id": 160,
     "category_name": "Geophysics",
     "alex_category_id": "8058405"
   },
   {
-    "category_id": 10540,
-    "category_name": "Petrology",
-    "alex_category_id": "5900021"
+    "category_id": 65,
+    "category_name": "Computer vision",
+    "alex_category_id": "31972630"
   },
   {
-    "category_id": 12002,
+    "category_id": 484,
+    "category_name": "Combinatorics",
+    "alex_category_id": "114614502"
+  },
+  {
+    "category_id": 261,
+    "category_name": "Ecology",
+    "alex_category_id": "18903297"
+  },
+  {
+    "category_id": 254,
+    "category_name": "Environmental planning",
+    "alex_category_id": "91375879"
+  },
+  {
+    "category_id": 61,
+    "category_name": "Aesthetics",
+    "alex_category_id": "107038049"
+  },
+  {
+    "category_id": 294,
+    "category_name": "Environmental ethics",
+    "alex_category_id": "95124753"
+  },
+  {
+    "category_id": 839,
+    "category_name": "Bioinformatics",
+    "alex_category_id": "60644358"
+  },
+  {
+    "category_id": 927,
+    "category_name": "Psychotherapist",
+    "alex_category_id": "542102704"
+  },
+  {
+    "category_id": 2854,
+    "category_name": "Business administration",
+    "alex_category_id": "178550888"
+  },
+  {
+    "category_id": 995,
+    "category_name": "Visual arts",
+    "alex_category_id": "153349607"
+  },
+  {
+    "category_id": 915,
+    "category_name": "Multimedia",
+    "alex_category_id": "49774154"
+  },
+  {
+    "category_id": 1578,
+    "category_name": "Neoclassical economics",
+    "alex_category_id": "133425853"
+  },
+  {
+    "category_id": 2466,
+    "category_name": "Financial system",
+    "alex_category_id": "73283319"
+  },
+  {
+    "category_id": 1663,
+    "category_name": "Labour economics",
+    "alex_category_id": "145236788"
+  },
+  {
+    "category_id": 1260,
+    "category_name": "Biomedical engineering",
+    "alex_category_id": "136229726"
+  },
+  {
+    "category_id": 668,
+    "category_name": "Control engineering",
+    "alex_category_id": "133731056"
+  },
+  {
+    "category_id": 606,
+    "category_name": "Earth science",
+    "alex_category_id": "1965285"
+  },
+  {
+    "category_id": 1214,
+    "category_name": "Religious studies",
+    "alex_category_id": "24667770"
+  },
+  {
+    "category_id": 756,
+    "category_name": "Pharmacology",
+    "alex_category_id": "98274493"
+  },
+  {
+    "category_id": 874,
+    "category_name": "Computational chemistry",
+    "alex_category_id": "147597530"
+  },
+  {
+    "category_id": 1657,
+    "category_name": "Nursing",
+    "alex_category_id": "159110408"
+  },
+  {
+    "category_id": 793,
+    "category_name": "Pathology",
+    "alex_category_id": "142724271"
+  },
+  {
+    "category_id": 576,
+    "category_name": "Internet privacy",
+    "alex_category_id": "108827166"
+  },
+  {
+    "category_id": 1312,
+    "category_name": "Molecular physics",
+    "alex_category_id": "41999313"
+  },
+  {
+    "category_id": 2695,
+    "category_name": "Mathematical physics",
+    "alex_category_id": "37914503"
+  },
+  {
+    "category_id": 485,
+    "category_name": "Natural language processing",
+    "alex_category_id": "204321447"
+  },
+  {
+    "category_id": 683,
+    "category_name": "Agronomy",
+    "alex_category_id": "6557445"
+  },
+  {
+    "category_id": 1992,
+    "category_name": "Speech recognition",
+    "alex_category_id": "28490314"
+  },
+  {
+    "category_id": 1245,
+    "category_name": "Anthropology",
+    "alex_category_id": "19165224"
+  },
+  {
+    "category_id": 513,
+    "category_name": "Chromatography",
+    "alex_category_id": "43617362"
+  },
+  {
+    "category_id": 909,
+    "category_name": "International trade",
+    "alex_category_id": "155202549"
+  },
+  {
+    "category_id": 903,
+    "category_name": "Social science",
+    "alex_category_id": "36289849"
+  },
+  {
+    "category_id": 674,
+    "category_name": "Microbiology",
+    "alex_category_id": "89423630"
+  },
+  {
+    "category_id": 501,
+    "category_name": "Nuclear engineering",
+    "alex_category_id": "116915560"
+  },
+  {
+    "category_id": 2675,
+    "category_name": "Computer network",
+    "alex_category_id": "31258907"
+  },
+  {
+    "category_id": 1764,
+    "category_name": "Composite material",
+    "alex_category_id": "159985019"
+  },
+  {
+    "category_id": 658,
+    "category_name": "Zoology",
+    "alex_category_id": "90856448"
+  },
+  {
+    "category_id": 617,
+    "category_name": "Astrobiology",
+    "alex_category_id": "87355193"
+  },
+  {
+    "category_id": 1750,
+    "category_name": "Radiology",
+    "alex_category_id": "126838900"
+  },
+  {
+    "category_id": 667,
+    "category_name": "Dermatology",
+    "alex_category_id": "16005928"
+  },
+  {
+    "category_id": 1409,
+    "category_name": "Traditional medicine",
+    "alex_category_id": "556039675"
+  },
+  {
+    "category_id": 567,
+    "category_name": "Applied psychology",
+    "alex_category_id": "75630572"
+  },
+  {
+    "category_id": 1550,
+    "category_name": "Economy",
+    "alex_category_id": "136264566"
+  },
+  {
+    "category_id": 1250,
+    "category_name": "Genealogy",
+    "alex_category_id": "53553401"
+  },
+  {
+    "category_id": 597,
+    "category_name": "Medical emergency",
+    "alex_category_id": "545542383"
+  },
+  {
+    "category_id": 1360,
+    "category_name": "Finance",
+    "alex_category_id": "10138342"
+  },
+  {
+    "category_id": 690,
+    "category_name": "Cancer research",
+    "alex_category_id": "502942594"
+  },
+  {
+    "category_id": 587,
+    "category_name": "Positive economics",
+    "alex_category_id": "118084267"
+  },
+  {
+    "category_id": 2267,
+    "category_name": "Programming language",
+    "alex_category_id": "199360897"
+  },
+  {
+    "category_id": 2362,
+    "category_name": "Polymer chemistry",
+    "alex_category_id": "188027245"
+  },
+  {
+    "category_id": 810,
+    "category_name": "Medicinal chemistry",
+    "alex_category_id": "155647269"
+  },
+  {
+    "category_id": 2221,
+    "category_name": "Organic chemistry",
+    "alex_category_id": "178790620"
+  },
+  {
+    "category_id": 1152,
+    "category_name": "Obstetrics",
+    "alex_category_id": "131872663"
+  },
+  {
+    "category_id": 1255,
+    "category_name": "Gastroenterology",
+    "alex_category_id": "90924648"
+  },
+  {
+    "category_id": 940,
+    "category_name": "Cognitive science",
+    "alex_category_id": "188147891"
+  },
+  {
+    "category_id": 1447,
+    "category_name": "Operating system",
+    "alex_category_id": "111919701"
+  },
+  {
+    "category_id": 527,
+    "category_name": "Aerospace engineering",
+    "alex_category_id": "146978453"
+  },
+  {
+    "category_id": 1075,
+    "category_name": "Political economy",
+    "alex_category_id": "138921699"
+  },
+  {
+    "category_id": 500,
+    "category_name": "Financial economics",
+    "alex_category_id": "106159729"
+  },
+  {
+    "category_id": 953,
+    "category_name": "Classics",
+    "alex_category_id": "74916050"
+  },
+  {
+    "category_id": 1565,
+    "category_name": "Keynesian economics",
+    "alex_category_id": "165556158"
+  },
+  {
+    "category_id": 1785,
+    "category_name": "Physical chemistry",
+    "alex_category_id": "147789679"
+  },
+  {
+    "category_id": 451,
+    "category_name": "Gender studies",
+    "alex_category_id": "107993555"
+  },
+  {
+    "category_id": 652,
+    "category_name": "Botany",
+    "alex_category_id": "59822182"
+  },
+  {
+    "category_id": 1464,
+    "category_name": "Ophthalmology",
+    "alex_category_id": "118487528"
+  },
+  {
+    "category_id": 840,
+    "category_name": "Parallel computing",
+    "alex_category_id": "173608175"
+  },
+  {
+    "category_id": 2399,
+    "category_name": "Chemical physics",
+    "alex_category_id": "159467904"
+  },
+  {
+    "category_id": 863,
+    "category_name": "Agroforestry",
+    "alex_category_id": "54286561"
+  },
+  {
+    "category_id": 720,
+    "category_name": "Biochemistry",
+    "alex_category_id": "55493867"
+  },
+  {
+    "category_id": 1209,
+    "category_name": "Actuarial science",
+    "alex_category_id": "162118730"
+  },
+  {
+    "category_id": 1780,
+    "category_name": "Simulation",
+    "alex_category_id": "44154836"
+  },
+  {
+    "category_id": 2225,
+    "category_name": "Nuclear chemistry",
+    "alex_category_id": "13965031"
+  },
+  {
+    "category_id": 1692,
+    "category_name": "Emergency medicine",
+    "alex_category_id": "194828623"
+  },
+  {
+    "category_id": 504,
+    "category_name": "Automotive engineering",
+    "alex_category_id": "171146098"
+  },
+  {
+    "category_id": 2908,
+    "category_name": "Biological system",
+    "alex_category_id": "186060115"
+  },
+  {
+    "category_id": 987,
+    "category_name": "Biochemical engineering",
+    "alex_category_id": "183696295"
+  },
+  {
+    "category_id": 818,
+    "category_name": "Linguistics",
+    "alex_category_id": "41895202"
+  },
+  {
+    "category_id": 920,
+    "category_name": "Monetary economics",
+    "alex_category_id": "556758197"
+  },
+  {
+    "category_id": 731,
+    "category_name": "Genetics",
+    "alex_category_id": "54355233"
+  },
+  {
+    "category_id": 1791,
+    "category_name": "Toxicology",
+    "alex_category_id": "33070731"
+  },
+  {
+    "category_id": 2446,
+    "category_name": "Microeconomics",
+    "alex_category_id": "175444787"
+  },
+  {
+    "category_id": 1106,
+    "category_name": "Distributed computing",
+    "alex_category_id": "120314980"
+  },
+  {
+    "category_id": 604,
+    "category_name": "Paleontology",
+    "alex_category_id": "151730666"
+  },
+  {
+    "category_id": 2457,
+    "category_name": "Demographic economics",
+    "alex_category_id": "4249254"
+  },
+  {
+    "category_id": 642,
+    "category_name": "Inorganic chemistry",
+    "alex_category_id": "179104552"
+  },
+  {
+    "category_id": 705,
+    "category_name": "Molecular biology",
+    "alex_category_id": "153911025"
+  },
+  {
+    "category_id": 550,
+    "category_name": "Metallurgy",
+    "alex_category_id": "191897082"
+  },
+  {
+    "category_id": 1596,
+    "category_name": "Market economy",
+    "alex_category_id": "34447519"
+  },
+  {
+    "category_id": 1972,
+    "category_name": "Systems engineering",
+    "alex_category_id": "201995342"
+  },
+  {
+    "category_id": 886,
+    "category_name": "Agricultural engineering",
+    "alex_category_id": "88463610"
+  },
+  {
+    "category_id": 623,
+    "category_name": "Environmental chemistry",
+    "alex_category_id": "107872376"
+  },
+  {
+    "category_id": 2974,
+    "category_name": "Polymer science",
+    "alex_category_id": "126348684"
+  },
+  {
+    "category_id": 2341,
+    "category_name": "Agricultural economics",
+    "alex_category_id": "48824518"
+  },
+  {
+    "category_id": 859,
+    "category_name": "Animal science",
+    "alex_category_id": "140793950"
+  },
+  {
+    "category_id": 1568,
+    "category_name": "Real-time computing",
+    "alex_category_id": "79403827"
+  },
+  {
+    "category_id": 851,
+    "category_name": "Socioeconomics",
+    "alex_category_id": "45355965"
+  },
+  {
+    "category_id": 1079,
+    "category_name": "Macroeconomics",
+    "alex_category_id": "139719470"
+  },
+  {
+    "category_id": 908,
+    "category_name": "Psychoanalysis",
+    "alex_category_id": "11171543"
+  },
+  {
+    "category_id": 369,
+    "category_name": "Development economics",
+    "alex_category_id": "47768531"
+  },
+  {
+    "category_id": 1911,
+    "category_name": "Chemical engineering",
+    "alex_category_id": "42360764"
+  },
+  {
+    "category_id": 1414,
+    "category_name": "Fishery",
+    "alex_category_id": "505870484"
+  },
+  {
+    "category_id": 1109,
+    "category_name": "Marketing",
+    "alex_category_id": "162853370"
+  },
+  {
+    "category_id": 2493,
+    "category_name": "Quantum electrodynamics",
+    "alex_category_id": "3079626"
+  },
+  {
+    "category_id": 518,
+    "category_name": "Waste management",
+    "alex_category_id": "548081761"
+  },
+  {
+    "category_id": 1957,
+    "category_name": "Cartography",
+    "alex_category_id": "58640448"
+  },
+  {
+    "category_id": 708,
+    "category_name": "Andrology",
+    "alex_category_id": "16685009"
+  },
+  {
+    "category_id": 2209,
+    "category_name": "Veterinary medicine",
+    "alex_category_id": "42972112"
+  },
+  {
+    "category_id": 532,
+    "category_name": "Atomic physics",
+    "alex_category_id": "184779094"
+  },
+  {
+    "category_id": 686,
+    "category_name": "Telecommunications",
+    "alex_category_id": "76155785"
+  },
+  {
+    "category_id": 703,
+    "category_name": "Cell biology",
+    "alex_category_id": "95444343"
+  },
+  {
+    "category_id": 1243,
+    "category_name": "Theoretical physics",
+    "alex_category_id": "33332235"
+  },
+  {
+    "category_id": 2245,
+    "category_name": "Physiology",
+    "alex_category_id": "42407357"
+  },
+  {
+    "category_id": 651,
+    "category_name": "Pulp and paper industry",
+    "alex_category_id": "528095902"
+  },
+  {
+    "category_id": 1340,
+    "category_name": "Quantum mechanics",
+    "alex_category_id": "62520636"
+  },
+  {
+    "category_id": 1239,
+    "category_name": "Pedagogy",
+    "alex_category_id": "19417346"
+  },
+  {
+    "category_id": 803,
+    "category_name": "Combinatorial chemistry",
+    "alex_category_id": "21951064"
+  },
+  {
+    "category_id": 2035,
+    "category_name": "Audiology",
+    "alex_category_id": "548259974"
+  },
+  {
+    "category_id": 655,
+    "category_name": "Horticulture",
+    "alex_category_id": "144027150"
+  },
+  {
+    "category_id": 507,
+    "category_name": "Process engineering",
+    "alex_category_id": "21880701"
+  },
+  {
+    "category_id": 969,
+    "category_name": "Ancient history",
+    "alex_category_id": "195244886"
+  },
+  {
+    "category_id": 575,
+    "category_name": "World Wide Web",
+    "alex_category_id": "136764020"
+  },
+  {
+    "category_id": 1932,
+    "category_name": "Pure mathematics",
+    "alex_category_id": "202444582"
+  },
+  {
+    "category_id": 562,
+    "category_name": "Management",
+    "alex_category_id": "187736073"
+  },
+  {
+    "category_id": 569,
+    "category_name": "Knowledge management",
+    "alex_category_id": "56739046"
+  },
+  {
+    "category_id": 2919,
+    "category_name": "Forensic engineering",
+    "alex_category_id": "77595967"
+  },
+  {
+    "category_id": 2559,
+    "category_name": "Arithmetic",
+    "alex_category_id": "94375191"
+  },
+  {
+    "category_id": 2084,
+    "category_name": "Electronic engineering",
+    "alex_category_id": "24326235"
+  },
+  {
+    "category_id": 1589,
+    "category_name": "Operations research",
+    "alex_category_id": "42475967"
+  },
+  {
+    "category_id": 601,
+    "category_name": "Geochemistry",
+    "alex_category_id": "17409809"
+  },
+  {
+    "category_id": 6858,
+    "category_name": "Biotechnology",
+    "alex_category_id": "150903083"
+  },
+  {
+    "category_id": 6418,
+    "category_name": "International economics",
+    "alex_category_id": "18547055"
+  },
+  {
+    "category_id": 11566,
+    "category_name": "Economic policy",
+    "alex_category_id": "105639569"
+  },
+  {
+    "category_id": 3383,
+    "category_name": "Classical economics",
+    "alex_category_id": "167562979"
+  },
+  {
+    "category_id": 4362,
+    "category_name": "Reliability engineering",
+    "alex_category_id": "200601418"
+  },
+  {
+    "category_id": 3500,
+    "category_name": "Manufacturing engineering",
+    "alex_category_id": "117671659"
+  },
+  {
+    "category_id": 4746,
+    "category_name": "Environmental protection",
+    "alex_category_id": "526734887"
+  },
+  {
+    "category_id": 4599,
+    "category_name": "Welfare economics",
+    "alex_category_id": "549774020"
+  },
+  {
+    "category_id": 9758,
+    "category_name": "Orthodontics",
+    "alex_category_id": "29694066"
+  },
+  {
+    "category_id": 3846,
+    "category_name": "Astrophysics",
+    "alex_category_id": "44870925"
+  },
+  {
+    "category_id": 3719,
+    "category_name": "Industrial engineering",
+    "alex_category_id": "13736549"
+  },
+  {
+    "category_id": 3044,
+    "category_name": "Operations management",
+    "alex_category_id": "21547014"
+  },
+  {
+    "category_id": 7013,
+    "category_name": "Computer hardware",
+    "alex_category_id": "9390403"
+  },
+  {
+    "category_id": 3764,
+    "category_name": "Seismology",
+    "alex_category_id": "165205528"
+  },
+  {
+    "category_id": 305,
+    "category_name": "Physical medicine and rehabilitation",
+    "alex_category_id": "99508421"
+  },
+  {
+    "category_id": 3843,
+    "category_name": "Particle physics",
+    "alex_category_id": "109214941"
+  },
+  {
+    "category_id": 5479,
+    "category_name": "Petroleum engineering",
+    "alex_category_id": "78762247"
+  },
+  {
+    "category_id": 1687,
+    "category_name": "Theoretical computer science",
+    "alex_category_id": "80444323"
+  },
+  {
+    "category_id": 3755,
+    "category_name": "Geotechnical engineering",
+    "alex_category_id": "187320778"
+  },
+  {
+    "category_id": 4796,
     "category_name": "Optometry",
     "alex_category_id": "119767625"
   },
   {
-    "category_id": 10351,
-    "category_name": "Ophthalmology",
-    "alex_category_id": "118487528"
+    "category_id": 4515,
+    "category_name": "Electrical engineering",
+    "alex_category_id": "119599485"
+  },
+  {
+    "category_id": 545,
+    "category_name": "Computational physics",
+    "alex_category_id": "30475298"
+  },
+  {
+    "category_id": 3056,
+    "category_name": "Stereochemistry",
+    "alex_category_id": "71240020"
+  },
+  {
+    "category_id": 4877,
+    "category_name": "Geometry",
+    "alex_category_id": "2524010"
+  },
+  {
+    "category_id": 9337,
+    "category_name": "Petrology",
+    "alex_category_id": "5900021"
+  },
+  {
+    "category_id": 4767,
+    "category_name": "Engineering drawing",
+    "alex_category_id": "199639397"
+  },
+  {
+    "category_id": 9408,
+    "category_name": "Civil engineering",
+    "alex_category_id": "147176958"
+  },
+  {
+    "category_id": 3468,
+    "category_name": "Transport engineering",
+    "alex_category_id": "22212356"
+  },
+  {
+    "category_id": 7340,
+    "category_name": "Construction engineering",
+    "alex_category_id": "107053488"
+  },
+  {
+    "category_id": 8663,
+    "category_name": "Marine engineering",
+    "alex_category_id": "199104240"
+  },
+  {
+    "category_id": 3017,
+    "category_name": "Dentistry",
+    "alex_category_id": "199343813"
+  },
+  {
+    "category_id": 10505,
+    "category_name": "Mining engineering",
+    "alex_category_id": "16674752"
+  },
+  {
+    "category_id": 11627,
+    "category_name": "Computer architecture",
+    "alex_category_id": "118524514"
+  },
+  {
+    "category_id": 7402,
+    "category_name": "Discrete mathematics",
+    "alex_category_id": "118615104"
+  },
+  {
+    "category_id": 12748,
+    "category_name": "Computer engineering",
+    "alex_category_id": "113775141"
+  },
+  {
+    "category_id": 3152,
+    "category_name": "Ethnology",
+    "alex_category_id": "2549261"
+  },
+  {
+    "category_id": 4914,
+    "category_name": "Commerce",
+    "alex_category_id": "54750564"
+  },
+  {
+    "category_id": 5010,
+    "category_name": "Radiochemistry",
+    "alex_category_id": "177322064"
+  },
+  {
+    "category_id": 3551,
+    "category_name": "Agricultural science",
+    "alex_category_id": "37621935"
   }
 ]
