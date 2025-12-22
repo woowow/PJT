@@ -7,11 +7,22 @@
 
     <!-- 메타 정보 -->
     <p class="meta">
-      {{ paper.author }} · {{ paper.year }}
+      <!-- 🔹 저자 목록 (클릭 가능) -->
+      <span
+        v-for="(author, idx) in paper.authors"
+        :key="author.author_id"
+        class="author-link"
+        @click.stop="goAuthor(author.author_id)"
+      >
+        {{ author.author_name }}
+        <span v-if="idx < paper.authors.length - 1">, </span>
+      </span>
+
+      <span v-if="paper.year"> · {{ paper.year }}</span>
     </p>
 
     <p class="meta">
-      인용 수: {{ paper.citation }}
+      인용 수: {{ paper.citation ?? 0 }}
     </p>
 
     <!-- 북마크 -->
@@ -56,6 +67,11 @@ const goDetail = () => {
   router.push(`/paper/${props.paper.id}`);
 };
 
+const goAuthor = (authorId) => {
+  if (!authorId) return;
+  router.push(`/author/${authorId}`);
+};
+
 const emitToggle = () => {
   emit("toggleBookmark");
 };
@@ -77,7 +93,6 @@ const emitToggle = () => {
   transition: all 0.2s ease;
 }
 
-/* Hover 효과 */
 .paper-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
@@ -106,6 +121,18 @@ const emitToggle = () => {
   margin: 4px 0;
   font-size: 14px;
   color: #4b5563;
+}
+
+/* =========================
+   저자 링크
+========================= */
+.author-link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.author-link:hover {
+  color: #2563eb;
 }
 
 /* =========================

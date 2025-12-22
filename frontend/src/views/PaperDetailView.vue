@@ -1,11 +1,21 @@
 <template>
-  <!-- 🔥 DEBUG: THIS FILE IS LOADED -->
   <div class="detail-wrapper">
     <div v-if="paper" class="detail-container">
       <h1 class="title">{{ paper.title }}</h1>
 
       <div class="meta-box">
-        <p><strong>저자:</strong> {{ paper.author || "-" }}</p>
+        <p>
+          <strong>저자:</strong>
+          <span
+            v-for="(author, idx) in paper.authors"
+            :key="author.author_id"
+            class="author-link"
+            @click="goAuthor(author.author_id)"
+          >
+            {{ author.author_name }}<span v-if="idx < paper.authors.length - 1">, </span>
+          </span>
+        </p>
+
         <p><strong>연도:</strong> {{ paper.year || "-" }}</p>
         <p><strong>주제:</strong> {{ paper.subject || "-" }}</p>
         <p><strong>기관:</strong> {{ paper.institution || "-" }}</p>
@@ -16,16 +26,13 @@
 
       <div class="abstract-box">
         <h2>초록 (Abstract)</h2>
-        <p v-if="paper.abstract">
-          {{ paper.abstract }}
-        </p>
+        <p v-if="paper.abstract">{{ paper.abstract }}</p>
         <p v-else class="empty">
           초록 정보가 제공되지 않는 논문입니다.
         </p>
       </div>
     </div>
 
-    <!-- 로딩 상태 -->
     <div v-else class="loading">
       논문 정보를 불러오는 중입니다...
     </div>
@@ -34,61 +41,30 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import api from "@/api";
 
 const route = useRoute();
+const router = useRouter();
 const paper = ref(null);
 
+const goAuthor = (authorId) => {
+  router.push(`/author/${authorId}`);
+};
+
 onMounted(async () => {
-  try {
-    const res = await api.get(`/papers/${route.params.id}/`);
-    paper.value = res.data;
-  } catch (err) {
-    console.error("논문 상세 조회 실패:", err);
-  }
+  const res = await api.get(`/papers/${route.params.id}/`);
+  paper.value = res.data;
 });
 </script>
 
 <style scoped>
-.detail-wrapper {
-  min-height: 400px;
+.author-link {
+  cursor: pointer;
+  text-decoration: underline;
 }
 
-.detail-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px;
-}
-
-.title {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 25px;
-}
-
-.meta-box p {
-  margin: 6px 0;
-  font-size: 16px;
-}
-
-.abstract-box {
-  margin-top: 25px;
-}
-
-.abstract-box h2 {
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-
-.empty {
-  color: #999;
-  font-style: italic;
-}
-
-.loading {
-  text-align: center;
-  margin-top: 80px;
-  color: #666;
+.author-link:hover {
+  color: #2563eb;
 }
 </style>

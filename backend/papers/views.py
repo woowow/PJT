@@ -84,18 +84,38 @@ def paper_list(request):
     res = es.search(index="papers", body=query)
 
     results = []
-    for hit in res["hits"]["hits"]:
-        src = hit["_source"]
-        results.append({
-            "id": src.get("id") or hit["_id"],
-            "title": src.get("title"),
-            "author": src.get("author"),
-            "year": src.get("year"),
-            "citation": src.get("citation", 0),
-            "institution": src.get("institution"),
-            "subject": src.get("subject"),
-            "country": src.get("country"),
-        })
+
+    with connection.cursor() as cursor:
+        for hit in res["hits"]["hits"]:
+            src = hit["_source"]
+            paper_id = src.get("id") or hit["_id"]
+
+            # 🔹 저자 목록 (PostgreSQL)
+            cursor.execute("""
+                SELECT
+                    a.author_id,
+                    a.author_name
+                FROM authorpaper ap
+                JOIN author a ON ap.author_id = a.author_id
+                WHERE ap.paper_id = %s
+                ORDER BY a.author_name
+            """, [paper_id])
+
+            authors = [
+                {"author_id": r[0], "author_name": r[1]}
+                for r in cursor.fetchall()
+            ]
+
+            results.append({
+                "id": paper_id,
+                "title": src.get("title"),
+                "authors": authors,                 # ✅ 핵심
+                "year": src.get("year"),
+                "citation": src.get("citation", 0),
+                "institution": src.get("institution"),
+                "subject": src.get("subject"),
+                "country": src.get("country"),
+            })
 
     return JsonResponse(results, safe=False)
 
@@ -104,38 +124,55 @@ def paper_list(request):
 # ======================
 def paper_detail(request, paper_id):
     with connection.cursor() as cursor:
+        # 논문 기본 정보
         cursor.execute("""
             SELECT
                 p.paper_id AS id,
                 p.title,
-                STRING_AGG(a.author_name, ', ') AS author,
                 EXTRACT(YEAR FROM p.announcement_date) AS year,
                 p.citation,
                 i.institution_name AS institution,
                 c.category_name AS subject,
-                ab.context AS abstract,
-                p.open_access,
-                p.locations
+                ab.context AS abstract
             FROM paper p
-            LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
-            LEFT JOIN author a ON ap.author_id = a.author_id
             LEFT JOIN institution i ON p.institution_id = i.institution_id
             LEFT JOIN category c ON p.category_id = c.category_id
             LEFT JOIN abstract ab ON p.paper_id = ab.paper_id
             WHERE p.paper_id = %s
-            GROUP BY
-                p.paper_id, p.title, p.announcement_date,
-                p.citation, i.institution_name,
-                c.category_name, ab.context,
-                p.open_access, p.locations
         """, [paper_id])
 
-        rows = dictfetchall(cursor)
+        paper_row = cursor.fetchone()
+        if not paper_row:
+            return JsonResponse({"error": "not found"}, status=404)
 
-    if not rows:
-        return JsonResponse({"error": "not found"}, status=404)
+        paper = {
+            "id": paper_row[0],
+            "title": paper_row[1],
+            "year": int(paper_row[2]) if paper_row[2] else None,
+            "citation": paper_row[3],
+            "institution": paper_row[4],
+            "subject": paper_row[5],
+            "abstract": paper_row[6],
+        }
 
-    return JsonResponse(rows[0])
+        # 저자 목록
+        cursor.execute("""
+            SELECT
+                a.author_id,
+                a.author_name
+            FROM authorpaper ap
+            JOIN author a ON ap.author_id = a.author_id
+            WHERE ap.paper_id = %s
+            ORDER BY a.author_name
+        """, [paper_id])
+
+        paper["authors"] = [
+            {"author_id": r[0], "author_name": r[1]}
+            for r in cursor.fetchall()
+        ]
+
+    return JsonResponse(paper)
+
 
 def paper_advanced_search(request):
     keyword = request.GET.get("keyword", "").strip()
@@ -208,20 +245,41 @@ def paper_advanced_search(request):
     res = es.search(index="papers", body=query)
 
     results = []
-    for hit in res["hits"]["hits"]:
-        src = hit["_source"]
-        results.append({
-            "id": src["id"],
-            "title": src["title"],
-            "author": src.get("author"),
-            "year": src.get("year"),
-            "citation": src.get("citation", 0),
-            "institution": src.get("institution"),
-            "subject": src.get("subject"),
-            "country": src.get("country"),
-        })
+
+    with connection.cursor() as cursor:
+        for hit in res["hits"]["hits"]:
+            src = hit["_source"]
+            paper_id = src.get("id")
+
+            # 🔹 저자 목록 (PostgreSQL)
+            cursor.execute("""
+                SELECT
+                    a.author_id,
+                    a.author_name
+                FROM authorpaper ap
+                JOIN author a ON ap.author_id = a.author_id
+                WHERE ap.paper_id = %s
+                ORDER BY a.author_name
+            """, [paper_id])
+
+            authors = [
+                {"author_id": r[0], "author_name": r[1]}
+                for r in cursor.fetchall()
+            ]
+
+            results.append({
+                "id": paper_id,
+                "title": src.get("title"),
+                "authors": authors,                 # ✅ 핵심
+                "year": src.get("year"),
+                "citation": src.get("citation", 0),
+                "institution": src.get("institution"),
+                "subject": src.get("subject"),
+                "country": src.get("country"),
+            })
 
     return JsonResponse(results, safe=False)
+
 
 def search_options(request):
     with connection.cursor() as cursor:
@@ -245,4 +303,55 @@ def search_options(request):
     return JsonResponse({
         "subjects": subjects,
         "countries": countries,
+    })
+    
+def author_detail(request, author_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                a.author_id,
+                a.author_name,
+                a.citation_total,
+                a.main_topic_1,
+                a.main_topic_2,
+                a.main_topic_3,
+                i.institution_name,
+                i.country_code
+            FROM author a
+            LEFT JOIN institution i ON a.institution_id = i.institution_id
+            WHERE a.author_id = %s
+        """, [author_id])
+
+        row = cursor.fetchone()
+        if not row:
+            return JsonResponse({"error": "not found"}, status=404)
+
+        author = {
+            "author_id": row[0],
+            "author_name": row[1],
+            "citation_total": row[2],
+            "institution": {
+                "institution_name": row[6],
+                "country_code": row[7],
+            },
+            "main_topics": [t for t in row[3:6] if t],
+        }
+
+        cursor.execute("""
+            SELECT
+                p.paper_id AS id,
+                p.title,
+                EXTRACT(YEAR FROM p.announcement_date) AS year,
+                p.citation
+            FROM paper p
+            JOIN authorpaper ap ON p.paper_id = ap.paper_id
+            WHERE ap.author_id = %s
+            ORDER BY p.announcement_date DESC
+        """, [author_id])
+
+        papers = dictfetchall(cursor)
+
+    return JsonResponse({
+        "author": author,
+        "papers": papers
     })
