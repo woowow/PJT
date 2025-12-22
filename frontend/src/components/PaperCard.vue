@@ -1,6 +1,10 @@
 <template>
   <div class="paper-card" @click="goDetail">
-    <button class="bookmark-btn" @click.stop="toggleBookmark" :title="isFavorited ? '즐겨찾기 해제' : '즐겨찾기'">
+    <button
+      class="bookmark-btn"
+      @click.stop="toggleBookmark"
+      :title="isFavorited ? '즐겨찾기 해제' : '즐겨찾기'"
+    >
       {{ isFavorited ? "★" : "☆" }}
     </button>
 
@@ -44,22 +48,40 @@ const toggleBookmark = async () => {
   const guestId = localStorage.getItem("guest_id");
   if (!guestId) return;
 
-  const res = await api.post("/favorites/toggle/", {
-    guest_id: guestId,
-    paper_id: props.paper.id,
-  });
+  // ✅ paper_id를 숫자로 강제 (ES 결과가 문자열인 케이스 방어)
+  const paperIdNum = Number(props.paper.id);
+  if (!Number.isFinite(paperIdNum)) {
+    console.warn("Invalid paper.id (not numeric):", props.paper.id);
+    return;
+  }
 
-  isFavorited.value = !!res.data.favorited;
-  emit("favoriteChanged");
+  try {
+    const res = await api.post("/favorites/toggle/", {
+      guest_id: Number(guestId),
+      paper_id: paperIdNum,
+    });
+
+    isFavorited.value = !!res.data.favorited;
+    emit("favoriteChanged");
+  } catch (e) {
+    console.error("toggle favorite failed:", e?.response?.data || e);
+  }
 };
 
 onMounted(async () => {
   const guestId = localStorage.getItem("guest_id");
   if (!guestId) return;
 
-  // ✅ trailing slash 통일
-  const res = await api.get(`/favorites/${guestId}/`);
-  isFavorited.value = Array.isArray(res.data) && res.data.some((p) => p.id === props.paper.id);
+  try {
+    const res = await api.get(`/favorites/${guestId}/`);
+
+    const myId = Number(props.paper.id);
+    isFavorited.value =
+      Array.isArray(res.data) &&
+      res.data.some((p) => Number(p.id) === myId);
+  } catch (e) {
+    console.warn("favorite list load failed:", e?.response?.data || e);
+  }
 });
 </script>
 
@@ -101,7 +123,7 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 800;
   line-height: 1.3;
-  margin: 2px 38px 8px 0; /* 별 버튼 공간 확보 */
+  margin: 2px 38px 8px 0;
 }
 
 .authors {

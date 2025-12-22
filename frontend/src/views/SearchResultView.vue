@@ -1,17 +1,16 @@
 <template>
   <div class="search-page">
-
     <!-- 🔵 상단 검색창 -->
     <div class="search-box">
-      <input 
+      <input
         v-model="keywordInput"
         type="text"
         placeholder="검색어 입력"
         class="search-input"
         @keyup.enter="searchAgain"
       />
-      <img 
-        src="@/assets/search-icon.png" 
+      <img
+        src="@/assets/search-icon.png"
         class="search-icon"
         @click="searchAgain"
       />
@@ -29,8 +28,9 @@
     <div v-if="loading">검색 중...</div>
 
     <div v-else-if="paginatedPapers.length > 0" class="results">
+      <!-- ✅ paginatedPapers를 렌더링해야 페이지네이션이 동작 -->
       <PaperCard
-        v-for="paper in papers"
+        v-for="paper in paginatedPapers"
         :key="paper.id"
         :paper="paper"
         @favoriteChanged="onFavoriteChanged"
@@ -47,7 +47,6 @@
       <span>{{ page }} / {{ totalPages }}</span>
       <button :disabled="page === totalPages" @click="page++">다음 ▶</button>
     </div>
-
   </div>
 </template>
 
@@ -62,11 +61,14 @@ const router = useRouter();
 
 /* -------------------------------
   Query State
+  - Hot Topics에서 subject로 넘어옴
+  - 혹시 다른 이름으로 넘어오는 케이스도 대비해서 fallback 추가
 -------------------------------- */
 const queryState = computed(() => ({
   keyword: route.query.keyword || "",
-  subject: route.query.subject || "",
-  country: route.query.country || "",
+  // ✅ Hot Topics: subject로 넘어오게 구현했지만, 혹시 category_name 등으로 넘어와도 표시되게 처리
+  subject: route.query.subject || route.query.category_name || "",
+  country: route.query.country || route.query.country_code || "",
   year_from: route.query.year_from || "",
   year_to: route.query.year_to || "",
   sort: route.query.sort || "",
@@ -87,8 +89,7 @@ const page = ref(1);
 const pageSize = 10;
 
 const onFavoriteChanged = () => {
-  // 아무것도 안 해도 OK
-  // MyPage → 즐겨찾기 탭으로 가면 ReadingBoard가 새로 mount됨
+  // nothing (필요하면 여기서 재조회 트리거 가능)
 };
 
 const totalPages = computed(() =>
@@ -101,7 +102,7 @@ const paginatedPapers = computed(() => {
 });
 
 /* -------------------------------
-  Fetch Papers (🔥 핵심 수정 지점)
+  Fetch Papers
 -------------------------------- */
 const fetchPapers = async () => {
   loading.value = true;
@@ -116,22 +117,31 @@ const fetchPapers = async () => {
   try {
     const res = isAdvanced
       ? await api.get("/papers/search/advanced/", {
-          params: route.query,
+          params: {
+            keyword: queryState.value.keyword,
+            subject: queryState.value.subject,
+            country: queryState.value.country,
+            year_from: queryState.value.year_from,
+            year_to: queryState.value.year_to,
+            sort: queryState.value.sort,
+          },
         })
       : await api.get("/papers/", {
           params: { keyword: queryState.value.keyword },
         });
 
+    const arr = Array.isArray(res.data) ? res.data : [];
+
     // ✅ PaperCard가 기대하는 구조 그대로 전달
-    papers.value = res.data.map(p => ({
+    papers.value = arr.map((p) => ({
       id: p.id,
       title: p.title || "(제목 없음)",
-      authors: p.authors || [],          // ⭐ 핵심
+      authors: p.authors || [],
       year: p.year || "-",
       citation: p.citation ?? 0,
       institution: p.institution || "-",
       subject: p.subject || "-",
-      country: p.country || "-"
+      country: p.country || "-",
     }));
 
     page.value = 1;
@@ -143,10 +153,19 @@ const fetchPapers = async () => {
   }
 };
 
+/* route.query가 바뀌면 자동 검색 */
 watch(
   () => route.query,
   fetchPapers,
   { immediate: true }
+);
+
+/* route 쿼리 바뀔 때 input도 동기화 */
+watch(
+  () => queryState.value.keyword,
+  (v) => {
+    keywordInput.value = v;
+  }
 );
 
 /* -------------------------------
@@ -159,14 +178,6 @@ const searchAgain = () => {
       keyword: keywordInput.value,
     },
   });
-};
-
-const checkBookmarked = (paperId) => {
-  return false;
-};
-
-const toggleBookmark = (paperId) => {
-  alert("북마크 기능은 아직 구현 중입니다");
 };
 </script>
 
@@ -199,6 +210,11 @@ const toggleBookmark = (paperId) => {
 .search-icon {
   width: 26px;
   cursor: pointer;
+}
+
+.query-info {
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
 .results {

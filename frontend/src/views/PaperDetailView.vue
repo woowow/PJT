@@ -53,8 +53,23 @@ const goAuthor = (authorId) => {
 };
 
 onMounted(async () => {
-  const res = await api.get(`/papers/${route.params.id}/`);
+  const paperId = route.params.id;
+
+  const res = await api.get(`/papers/${paperId}/`);
   paper.value = res.data;
+
+  const guestId = localStorage.getItem("guest_id");
+  if (guestId) {
+    try {
+      await api.post(`/papers/${paperId}/track/`, {
+        guest_id: guestId,
+        event: "VIEW",
+      });
+    } catch (e) {
+      // 트래킹 실패가 상세 렌더링을 막으면 UX가 깨져서 조용히 무시
+      console.warn("track failed:", e);
+    }
+  }
 });
 </script>
 
