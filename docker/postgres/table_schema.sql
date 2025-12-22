@@ -86,10 +86,11 @@ CREATE TABLE IF NOT EXISTS guest(
 ----------------------------------------------------
 -- GUEST FAVORITE
 ----------------------------------------------------
-CREATE TABLE IF NOT EXISTS guestfavorite(
+CREATE TABLE guestfavorite(
   favorite_id SERIAL PRIMARY KEY,
   guest_id INTEGER NOT NULL,
   paper_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'TODO',
   UNIQUE(guest_id, paper_id),
   FOREIGN KEY (guest_id) REFERENCES guest(guest_id),
   FOREIGN KEY (paper_id) REFERENCES paper(paper_id)
