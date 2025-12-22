@@ -15,9 +15,9 @@ import AuthorView from "@/views/AuthorView.vue";
 import RecommendView from "@/views/RecommendView.vue";
 import TrendView from "@/views/TrendView.vue";
 
-// 연구 활동
-import ActivityCalendarView from "@/views/ActivityCalendarView.vue";
-import ReadingBoardView from "@/views/ReadingBoardView.vue";
+// ❌ 제거: 연구 활동 라우트용 View
+// import ActivityCalendarView from "@/views/ActivityCalendarView.vue";
+// import ReadingBoardView from "@/views/ReadingBoardView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,7 +43,7 @@ const router = createRouter({
     {
       path: "/",
       component: MainLayout,
-      meta: { requiresAuth: true },   // 🔑 핵심
+      meta: { requiresAuth: true },
       children: [
         {
           path: "",
@@ -83,16 +83,18 @@ const router = createRouter({
           name: "trend",
           component: TrendView,
         },
-        {
-          path: "activity",
-          name: "activity",
-          component: ActivityCalendarView,
-        },
-        {
-          path: "reading",
-          name: "reading",
-          component: ReadingBoardView,
-        },
+
+        // ❌ 제거: 연구달력/연구현황 라우트
+        // {
+        //   path: "activity",
+        //   name: "activity",
+        //   component: ActivityCalendarView,
+        // },
+        // {
+        //   path: "reading",
+        //   name: "reading",
+        //   component: ReadingBoardView,
+        // },
       ],
     },
 
@@ -113,7 +115,7 @@ router.beforeEach((to, from, next) => {
   const guestId = localStorage.getItem("guest_id");
 
   // 로그인 필요 페이지
-  if (to.matched.some(r => r.meta.requiresAuth)) {
+  if (to.matched.some((r) => r.meta.requiresAuth)) {
     if (!guestId) {
       return next("/login");
     }
