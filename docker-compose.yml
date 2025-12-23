@@ -8,6 +8,8 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - "9200:9200"
+    networks:
+      - paper-net
 
   postgres:
     image: postgres:14
@@ -22,6 +24,59 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres/table_schema.sql:/docker-entrypoint-initdb.d/table_schema.sql
+    networks:
+      - paper-net
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: paper_zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - paper-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: paper_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # ✅ 9092 하나만 쓸거면 이 2줄로 끝
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - paper-net
+
+  # 토픽 자동 생성(1회 실행)
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: paper_kafka_init
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/bash", "-lc"]
+    command: >
+      "
+      echo '⏳ waiting kafka...' &&
+      sleep 12 &&
+      kafka-topics --bootstrap-server kafka:9092 --create
+        --if-not-exists --topic paper.events.v1 --partitions 3 --replication-factor 1 &&
+      echo '✅ topic created: paper.events.v1' &&
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
+    networks:
+      - paper-net
 
   backend:
     build: ./backend
@@ -32,10 +87,14 @@ services:
     depends_on:
       - postgres
       - elasticsearch
+      - kafka
+      - kafka-init
     ports:
       - "8000:8000"
     volumes:
       - ./data:/app/data
+    networks:
+      - paper-net
 
   frontend:
     build: ./frontend
@@ -45,6 +104,8 @@ services:
       - backend
     ports:
       - "5173:5173"
+    networks:
+      - paper-net
 
   cron:
     image: curlimages/curl:latest
@@ -54,6 +115,8 @@ services:
       - backend
     entrypoint: >
       sh -c "echo '0 0 * * 0 curl -X POST http://backend:8000/api/reset-weekly/' > /etc/crontabs/root && crond -f -d 8"
+    networks:
+      - paper-net
 
   namenode:
     build:
@@ -62,8 +125,8 @@ services:
     container_name: namenode
     hostname: namenode
     ports:
-      - "9870:9870" # HDFS 웹 UI
-      - "9000:9000" # RPC 통신 포트
+      - "9870:9870"
+      - "9000:9000"
     volumes:
       - ./hadoop_data/namenode:/usr/local/hadoop/hdfs/namenode
     networks:
@@ -91,9 +154,52 @@ services:
     networks:
       - paper-net
 
+  flink-jobmanager:
+    image: flink:1.18.1-scala_2.12-java11
+    container_name: paper_flink_jobmanager
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    networks:
+      - paper-net
+
+  flink-taskmanager:
+    image: flink:1.18.1-scala_2.12-java11
+    container_name: paper_flink_taskmanager
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=4
+    networks:
+      - paper-net
+
+  flink-job:
+    build: ./flink
+    container_name: paper_flink_job
+    depends_on:
+      - flink-jobmanager
+      - flink-taskmanager
+      - kafka
+      - postgres
+    environment:
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - KAFKA_TOPIC=paper.events.v1
+      - KAFKA_GROUP_ID=paper-flink-agg
+
+      - JDBC_URL=jdbc:postgresql://postgres:5432/paper_db
+      - JDBC_USER=postgres
+      - JDBC_PASSWORD=postgres
+    networks:
+      - paper-net
+    restart: "no"
+
+    
 volumes:
   pgdata:
-
 
 networks:
   paper-net:

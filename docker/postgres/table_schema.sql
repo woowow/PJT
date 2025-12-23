@@ -120,3 +120,19 @@ CREATE TABLE IF NOT EXISTS authorpaper(
   FOREIGN KEY (paper_id) REFERENCES paper(paper_id),
   FOREIGN KEY (author_id) REFERENCES author(author_id)
 );
+
+CREATE TABLE IF NOT EXISTS guest_recommend (
+  guest_id INTEGER NOT NULL,
+  paper_id INTEGER NOT NULL,
+  score DOUBLE PRECISION NOT NULL DEFAULT 0,
+  reason TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (guest_id, paper_id)
+);
+
+CREATE TABLE IF NOT EXISTS reco_job_run (
+  run_id SERIAL PRIMARY KEY,
+  ran_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  status TEXT NOT NULL,
+  notes TEXT
+);

@@ -31,14 +31,36 @@ def connect():
 
 
 # ===============================
-# JSON 로드
+# JSON 로드 (안전 버전)
+# - 파일 없으면 []
+# - 0바이트/깨진 JSON이면 []
 # ===============================
 def load_json(filename):
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
         return []
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+
+    try:
+        # 0바이트 방어
+        if os.path.getsize(path) == 0:
+            print(f"⚠️ {filename} is empty file -> treated as []")
+            return []
+
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # 배열/리스트가 아니면 방어적으로 []
+        if not isinstance(data, list):
+            print(f"⚠️ {filename} is not a JSON list -> treated as []")
+            return []
+        return data
+
+    except json.JSONDecodeError:
+        print(f"⚠️ {filename} JSONDecodeError -> treated as []")
+        return []
+    except Exception as e:
+        print(f"⚠️ {filename} load failed ({e}) -> treated as []")
+        return []
 
 
 # ===============================
@@ -204,37 +226,37 @@ def insert_paper(cur, items):
         # -------------------
         if p.get("abstract"):
             pid = get_paper_id(cur, p["alex_paper_id"])
-
-            cur.execute(
-                """
-                INSERT INTO abstract (paper_id, context)
-                VALUES (%s, %s)
-                ON CONFLICT (paper_id) DO UPDATE
-                SET context = EXCLUDED.context;
-            """,
-                (pid, p["abstract"]),
-            )
+            if pid:
+                cur.execute(
+                    """
+                    INSERT INTO abstract (paper_id, context)
+                    VALUES (%s, %s)
+                    ON CONFLICT (paper_id) DO UPDATE
+                    SET context = EXCLUDED.context;
+                """,
+                    (pid, p["abstract"]),
+                )
 
         # -------------------
         # YEAR-CITATION 저장
         # -------------------
         if p.get("cited_by_year"):
             pid = get_paper_id(cur, p["alex_paper_id"])
-            y = sorted(p["cited_by_year"], key=lambda x: -x["year"])
+            if pid:
+                y = sorted(p["cited_by_year"], key=lambda x: -x["year"])
+                counts = [y[i]["count"] if i < len(y) else 0 for i in range(3)]
 
-            counts = [y[i]["count"] if i < len(y) else 0 for i in range(3)]
-
-            cur.execute(
-                """
-                INSERT INTO yearcitation (paper_id, recent_year1_count, recent_year2_count, recent_year3_count)
-                VALUES (%s,%s,%s,%s)
-                ON CONFLICT (paper_id) DO UPDATE
-                SET recent_year1_count = EXCLUDED.recent_year1_count,
-                    recent_year2_count = EXCLUDED.recent_year2_count,
-                    recent_year3_count = EXCLUDED.recent_year3_count;
-            """,
-                (pid, counts[0], counts[1], counts[2]),
-            )
+                cur.execute(
+                    """
+                    INSERT INTO yearcitation (paper_id, recent_year1_count, recent_year2_count, recent_year3_count)
+                    VALUES (%s,%s,%s,%s)
+                    ON CONFLICT (paper_id) DO UPDATE
+                    SET recent_year1_count = EXCLUDED.recent_year1_count,
+                        recent_year2_count = EXCLUDED.recent_year2_count,
+                        recent_year3_count = EXCLUDED.recent_year3_count;
+                """,
+                    (pid, counts[0], counts[1], counts[2]),
+                )
 
 
 # ===============================
@@ -259,7 +281,8 @@ def insert_authorpaper(cur, items):
         if pid and aid:
             data.append((pid, aid))
 
-    execute_batch(cur, sql, data)
+    if data:
+        execute_batch(cur, sql, data)
 
 
 # ===============================
@@ -317,7 +340,8 @@ def insert_guestfavorite(cur, items):
         if gid and pid:
             data.append((gid, pid))
 
-    execute_batch(cur, sql, data)
+    if data:
+        execute_batch(cur, sql, data)
 
 
 # ===============================
@@ -329,6 +353,7 @@ def insert_guestcategory(cur, items):
 
     print("📊 GUEST CATEGORY COUNT 처리...")
 
+    # table_schema.sql 기준: 컬럼명이 count
     sql = """
         INSERT INTO guestcategorycount (guest_id, category_id, count)
         VALUES (%s, %s, %s)
@@ -343,7 +368,8 @@ def insert_guestcategory(cur, items):
         if gid and cid:
             data.append((gid, cid, c.get("count", 0)))
 
-    execute_batch(cur, sql, data)
+    if data:
+        execute_batch(cur, sql, data)
 
 
 # ===============================

@@ -6,6 +6,14 @@ from elasticsearch import Elasticsearch
 import os
 import logging
 from psycopg2 import sql as psql
+from .services.kafka_producer import publish_user_event
+from django.conf import settings
+
+def _use_stream_tracking() -> bool:
+    """
+    요청 시점에 settings를 읽어서 결정(캐시/재시작/빌드 꼬임 디버깅 쉬움)
+    """
+    return bool(getattr(settings, "USE_STREAM_TRACKING", False))
 
 logger = logging.getLogger(__name__)
 
@@ -375,13 +383,25 @@ def track_paper_action(request, paper_id):
     except (TypeError, ValueError):
         return JsonResponse({"error": "guest_id must be integer"}, status=400)
 
-    with transaction.atomic():
-        with connection.cursor() as cursor:
-            ok = _track_interest(cursor, guest_id_int, paper_id)
-            if not ok:
-                return JsonResponse({"error": "paper not found"}, status=404)
+    # ✅ 스트리밍 집계(Flink)를 쓰면 DB 직접 집계는 스킵 (중복 방지)
+    if not _use_stream_tracking():
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                ok = _track_interest(cursor, guest_id_int, paper_id)
+                if not ok:
+                    return JsonResponse({"error": "paper not found"}, status=404)
+
+    # ✅ Kafka 이벤트 발행(실패해도 API는 성공)
+    try:
+        publish_user_event(guest_id_int, paper_id, "VIEW_DETAIL", meta={"source": "web"})
+    except Exception:
+        logger.exception(
+            "Kafka publish failed (VIEW_DETAIL) guest_id=%s paper_id=%s",
+            guest_id_int, paper_id
+        )
 
     return JsonResponse({"ok": True})
+
 
 
 # ======================
@@ -415,28 +435,62 @@ def toggle_favorite(request):
 
             row = cursor.fetchone()
 
+            # ----------------------
+            # 이미 즐겨찾기면 삭제
+            # ----------------------
             if row:
                 cursor.execute("""
                     DELETE FROM guestfavorite
                     WHERE favorite_id = %s
                 """, [row[0]])
+
+                action = "FAVORITE_REMOVE"
+
+                # ✅ Kafka 이벤트 발행
+                try:
+                    publish_user_event(guest_id_int, paper_id_int, action, meta={"source": "web"})
+                except Exception:
+                    logger.exception(
+                        "Kafka publish failed (%s) guest_id=%s paper_id=%s",
+                        action, guest_id_int, paper_id_int
+                    )
+
+                # (보통 즐겨찾기 해제는 집계 감소 안 함: 지금 설계 유지)
                 return JsonResponse({"favorited": False})
 
+            # ----------------------
+            # 즐겨찾기 추가
+            # ----------------------
             cursor.execute("""
                 INSERT INTO guestfavorite (guest_id, paper_id, status)
                 VALUES (%s, %s, 'TODO')
             """, [guest_id_int, paper_id_int])
 
-    # 부가 집계 (실패해도 즐겨찾기는 유지)
+            action = "FAVORITE_ADD"
+
+    # ✅ 스트리밍 집계(Flink)를 쓰면 DB 직접 집계는 스킵 (중복 방지)
+    if not _use_stream_tracking():
+        try:
+            with transaction.atomic():
+                with connection.cursor() as tcursor:
+                    _track_interest(tcursor, guest_id_int, paper_id_int)
+        except Exception as e:
+            logger.exception(
+                "Tracking failed but favorite kept. guest_id=%s paper_id=%s err=%s",
+                guest_id_int, paper_id_int, str(e)
+            )
+
+    # ✅ Kafka 이벤트 발행(트래킹 실패 여부와 무관)
     try:
-        with transaction.atomic():
-            with connection.cursor() as tcursor:
-                _track_interest(tcursor, guest_id_int, paper_id_int)
-    except Exception as e:
-        logger.exception("Tracking failed but favorite kept. guest_id=%s paper_id=%s err=%s",
-                         guest_id_int, paper_id_int, str(e))
+        publish_user_event(guest_id_int, paper_id_int, action, meta={"source": "web"})
+    except Exception:
+        logger.exception(
+            "Kafka publish failed (%s) guest_id=%s paper_id=%s",
+            action, guest_id_int, paper_id_int
+        )
 
     return JsonResponse({"favorited": True})
+
 
 
 def favorite_list(request, guest_id):
@@ -474,7 +528,6 @@ def favorite_list(request, guest_id):
 # 🔎 상세 검색
 # ======================
 def paper_advanced_search(request):
-    # ✅ 여러 키 이름을 허용해서 방어
     def get_any(*keys, default=""):
         for k in keys:
             v = request.GET.get(k)
@@ -501,11 +554,9 @@ def paper_advanced_search(request):
         })
 
     if subject:
-        # subject는 보통 text + keyword가 자동 생성됨
         filters.append({"term": {"subject.keyword": subject}})
 
     if country:
-        # country는 코드라 keyword로 고정 매칭 권장
         filters.append({"term": {"country.keyword": country}})
 
     if year_from or year_to:
@@ -566,7 +617,6 @@ def paper_advanced_search(request):
             })
 
     return JsonResponse(results, safe=False)
-
 
 
 def search_options(request):
@@ -639,11 +689,6 @@ def author_detail(request, author_id):
 
 
 def guest_profile(request, guest_id):
-    """
-    MyPage '내 정보'에서 쓰는 API
-    - interest_1~3은 원칙적으로 guest 테이블 값이지만,
-      혹시 갱신이 늦었거나 데이터가 없는 경우를 대비해 TOP3를 보정해서 내려줌
-    """
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT guest_id, guestname, interest_1, interest_2, interest_3
@@ -657,7 +702,6 @@ def guest_profile(request, guest_id):
 
         interest_1, interest_2, interest_3 = row[2], row[3], row[4]
 
-        # ✅ 보정: guestcategorycount TOP3가 있으면 그걸 우선
         try:
             top = _get_top_categories_for_guest(cursor, int(guest_id), 3)
             if top:
