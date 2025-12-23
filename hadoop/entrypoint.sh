@@ -1,6 +1,6 @@
 #!/bin/bash
+set -e
 
-# Java/Hadoop 환경 변수 설정
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 export HADOOP_HOME=/usr/local/hadoop
 export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
@@ -9,9 +9,16 @@ service ssh start
 
 echo "[$HOSTNAME] Starting Hadoop Services..."
 
+NAMENODE_DIR="$HADOOP_HOME/hdfs/namenode"
+DATANODE_DIR="$HADOOP_HOME/hdfs/datanode"
+
 if [[ "$HOSTNAME" == "namenode" ]]; then
-    echo "[Namenode] Formatting HDFS..."
-    hdfs namenode -format -force
+    if [[ -d "$NAMENODE_DIR/current" ]]; then
+        echo "[Namenode] HDFS already formatted. Skip format."
+    else
+        echo "[Namenode] Formatting HDFS (first time only)..."
+        hdfs namenode -format -force
+    fi
 
     echo "[Namenode] Starting NameNode..."
     hdfs namenode &
@@ -20,7 +27,6 @@ if [[ "$HOSTNAME" == "namenode" ]]; then
     yarn resourcemanager &
 
     tail -f /dev/null
-
 else
     echo "[$HOSTNAME] Starting DataNode..."
     hdfs datanode &
