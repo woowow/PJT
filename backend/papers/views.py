@@ -383,22 +383,18 @@ def track_paper_action(request, paper_id):
     except (TypeError, ValueError):
         return JsonResponse({"error": "guest_id must be integer"}, status=400)
 
-    # ✅ 스트리밍 집계(Flink)를 쓰면 DB 직접 집계는 스킵 (중복 방지)
-    if not _use_stream_tracking():
-        with transaction.atomic():
-            with connection.cursor() as cursor:
-                ok = _track_interest(cursor, guest_id_int, paper_id)
-                if not ok:
-                    return JsonResponse({"error": "paper not found"}, status=404)
+    # ✅ DB 집계는 하지 않음 (Flink가 담당)
+    # (paper_id 유효성만 체크하고 싶으면 여기서 SELECT만 한번 해도 됨)
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1 FROM paper WHERE paper_id=%s", [paper_id])
+        if not cursor.fetchone():
+            return JsonResponse({"error": "paper not found"}, status=404)
 
     # ✅ Kafka 이벤트 발행(실패해도 API는 성공)
     try:
         publish_user_event(guest_id_int, paper_id, "VIEW_DETAIL", meta={"source": "web"})
     except Exception:
-        logger.exception(
-            "Kafka publish failed (VIEW_DETAIL) guest_id=%s paper_id=%s",
-            guest_id_int, paper_id
-        )
+        logger.exception("Kafka publish failed (VIEW_DETAIL) guest_id=%s paper_id=%s", guest_id_int, paper_id)
 
     return JsonResponse({"ok": True})
 
@@ -425,6 +421,8 @@ def toggle_favorite(request):
     except (TypeError, ValueError):
         return JsonResponse({"error": "guest_id and paper_id must be integer"}, status=400)
 
+    action = None
+
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -435,61 +433,28 @@ def toggle_favorite(request):
 
             row = cursor.fetchone()
 
-            # ----------------------
-            # 이미 즐겨찾기면 삭제
-            # ----------------------
             if row:
                 cursor.execute("""
                     DELETE FROM guestfavorite
                     WHERE favorite_id = %s
                 """, [row[0]])
-
                 action = "FAVORITE_REMOVE"
+            else:
+                cursor.execute("""
+                    INSERT INTO guestfavorite (guest_id, paper_id, status)
+                    VALUES (%s, %s, 'TODO')
+                """, [guest_id_int, paper_id_int])
+                action = "FAVORITE_ADD"
 
-                # ✅ Kafka 이벤트 발행
-                try:
-                    publish_user_event(guest_id_int, paper_id_int, action, meta={"source": "web"})
-                except Exception:
-                    logger.exception(
-                        "Kafka publish failed (%s) guest_id=%s paper_id=%s",
-                        action, guest_id_int, paper_id_int
-                    )
-
-                # (보통 즐겨찾기 해제는 집계 감소 안 함: 지금 설계 유지)
-                return JsonResponse({"favorited": False})
-
-            # ----------------------
-            # 즐겨찾기 추가
-            # ----------------------
-            cursor.execute("""
-                INSERT INTO guestfavorite (guest_id, paper_id, status)
-                VALUES (%s, %s, 'TODO')
-            """, [guest_id_int, paper_id_int])
-
-            action = "FAVORITE_ADD"
-
-    # ✅ 스트리밍 집계(Flink)를 쓰면 DB 직접 집계는 스킵 (중복 방지)
-    if not _use_stream_tracking():
-        try:
-            with transaction.atomic():
-                with connection.cursor() as tcursor:
-                    _track_interest(tcursor, guest_id_int, paper_id_int)
-        except Exception as e:
-            logger.exception(
-                "Tracking failed but favorite kept. guest_id=%s paper_id=%s err=%s",
-                guest_id_int, paper_id_int, str(e)
-            )
-
-    # ✅ Kafka 이벤트 발행(트래킹 실패 여부와 무관)
+    # ✅ DB 집계는 하지 않음 (Flink가 담당)
+    # ✅ Kafka 이벤트 발행
     try:
         publish_user_event(guest_id_int, paper_id_int, action, meta={"source": "web"})
     except Exception:
-        logger.exception(
-            "Kafka publish failed (%s) guest_id=%s paper_id=%s",
-            action, guest_id_int, paper_id_int
-        )
+        logger.exception("Kafka publish failed (%s) guest_id=%s paper_id=%s", action, guest_id_int, paper_id_int)
 
-    return JsonResponse({"favorited": True})
+    return JsonResponse({"favorited": (action == "FAVORITE_ADD")})
+
 
 
 

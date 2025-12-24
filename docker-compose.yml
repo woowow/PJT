@@ -107,16 +107,93 @@ services:
     networks:
       - paper-net
 
-  cron:
-    image: curlimages/curl:latest
-    container_name: paper_cron
-    user: root
-    depends_on:
-      - backend
-    entrypoint: >
-      sh -c "echo '0 0 * * 0 curl -X POST http://backend:8000/api/reset-weekly/' > /etc/crontabs/root && crond -f -d 8"
+  airflow-postgres:
+    image: postgres:14
+    container_name: paper_airflow_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_pgdata:/var/lib/postgresql/data
     networks:
       - paper-net
+    restart: always
+
+  airflow-init:
+    image: apache/airflow:2.9.3
+    container_name: paper_airflow_init
+    depends_on:
+      - airflow-postgres
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Asia/Seoul
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+
+      # PostgresOperator 쓰려면 provider 필요
+      _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-postgres
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    entrypoint: /bin/bash
+    command: -lc "
+      airflow db migrate &&
+      airflow users create
+        --username admin --password admin
+        --firstname admin --lastname admin
+        --role Admin --email admin@example.com
+      || true"
+
+    networks:
+      - paper-net
+    restart: "no"
+
+  airflow-webserver:
+    image: apache/airflow:2.9.3
+    container_name: paper_airflow_webserver
+    depends_on:
+      - airflow-postgres
+      - airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Asia/Seoul
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+      _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-postgres
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    ports:
+      - "8088:8080"
+    command: webserver
+    networks:
+      - paper-net
+    restart: always
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.3
+    container_name: paper_airflow_scheduler
+    depends_on:
+      - airflow-postgres
+      - airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Asia/Seoul
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+      _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-postgres
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: scheduler
+    networks:
+      - paper-net
+    restart: always
+
 
   namenode:
     build:
@@ -197,9 +274,71 @@ services:
       - paper-net
     restart: "no"
 
+  spark-master:
+    image: spark:3.5.7
+    container_name: paper_spark_master
+    hostname: spark-master
+    ports:
+      - "8080:8080"   # Spark master UI
+      - "7077:7077"   # Spark master port
+    volumes:
+      - ./spark/jobs:/opt/spark/jobs
+      - ./hadoop/core-site.xml:/opt/spark/conf/core-site.xml
+      - ./hadoop/hdfs-site.xml:/opt/spark/conf/hdfs-site.xml
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+      --host spark-master --port 7077 --webui-port 8080
+    networks:
+      - paper-net
+
+  spark-worker:
+    image: spark:3.5.7
+    container_name: paper_spark_worker
+    hostname: spark-worker
+    depends_on:
+      - spark-master
+    volumes:
+      - ./spark/jobs:/opt/spark/jobs
+      - ./hadoop/core-site.xml:/opt/spark/conf/core-site.xml
+      - ./hadoop/hdfs-site.xml:/opt/spark/conf/hdfs-site.xml
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077
+    networks:
+      - paper-net
+
+  spark-job-kafka-to-hdfs:
+    image: spark:3.5.7
+    container_name: paper_spark_job_kafka_to_hdfs
+    depends_on:
+      - spark-master
+      - spark-worker
+      - kafka
+      - namenode
+    environment:
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - KAFKA_TOPIC=paper.events.v1
+      - HDFS_BASE=hdfs://namenode:9000
+      - HDFS_OUT=hdfs://namenode:9000/data/events/paper_events
+      - CHECKPOINT=hdfs://namenode:9000/data/checkpoints/paper_events
+    volumes:
+      - ./spark/jobs:/opt/spark/jobs
+      - ./hadoop/core-site.xml:/opt/spark/conf/core-site.xml
+      - ./hadoop/hdfs-site.xml:/opt/spark/conf/hdfs-site.xml
+    command: >
+      /opt/spark/bin/spark-submit
+      --master spark://spark-master:7077
+      --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.7
+      /opt/spark/jobs/kafka_to_hdfs.py
+    networks:
+      - paper-net
+    restart: "no"
+
     
 volumes:
   pgdata:
+  airflow_pgdata:
+
 
 networks:
   paper-net:
