@@ -818,3 +818,72 @@ def trend_papers(request):
             p["authors"] = [{"author_id": r[0], "author_name": r[1]} for r in cursor.fetchall()]
 
     return JsonResponse(papers, safe=False)
+
+
+# backend/papers/views.py
+
+# backend/papers/views.py
+
+def recommendation_list(request):
+    guest_id = request.GET.get('guest_id')
+    if not guest_id:
+        return JsonResponse({"error": "guest_id required"}, status=400)
+
+    try:
+        with connection.cursor() as cursor:
+            # 1. 상위 3개 카테고리 추출
+            cursor.execute("""
+                SELECT gcc.category_id, c.category_name 
+                FROM guestcategorycount gcc
+                JOIN category c ON gcc.category_id = c.category_id
+                WHERE gcc.guest_id = %s 
+                ORDER BY gcc.count DESC LIMIT 3
+            """, [guest_id])
+            top_categories = cursor.fetchall()
+            
+            if not top_categories:
+                return JsonResponse({"results": []})
+
+            all_recommendations = []
+
+            for cat_id, cat_name in top_categories:
+                # ✅ 섹션 1: 해당 분야 기본기 (인용수 상위 5개)
+                cursor.execute("""
+                    SELECT p.paper_id, p.title, p.citation, p.announcement_date, 
+                           MAX(a.author_name) as author_name, 'FUNDAMENTAL' as type
+                    FROM paper p
+                    LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
+                    LEFT JOIN author a ON ap.author_id = a.author_id
+                    WHERE p.category_id = %s 
+                    GROUP BY p.paper_id, p.title, p.citation, p.announcement_date
+                    ORDER BY p.citation DESC LIMIT 5
+                """, [cat_id])
+                fundamental_papers = dictfetchall(cursor)
+
+                # ✅ 섹션 2: 최신 연구 트렌드 (인용 1회 이상 최신순 5개, 중복 제거)
+                # 위에서 뽑힌 5개 논문 ID를 제외합니다.
+                fundamental_ids = [p['paper_id'] for p in fundamental_papers]
+                
+                cursor.execute("""
+                    SELECT p.paper_id, p.title, p.citation, p.announcement_date, 
+                           MAX(a.author_name) as author_name, 'TREND' as type
+                    FROM paper p
+                    LEFT JOIN authorpaper ap ON p.paper_id = ap.paper_id
+                    LEFT JOIN author a ON ap.author_id = a.author_id
+                    WHERE p.category_id = %s 
+                      AND p.citation >= 1
+                      AND p.paper_id NOT IN %s
+                    GROUP BY p.paper_id, p.title, p.citation, p.announcement_date
+                    ORDER BY p.announcement_date DESC LIMIT 5
+                """, [cat_id, tuple(fundamental_ids) if fundamental_ids else (0,)])
+                trend_papers = dictfetchall(cursor)
+                
+                all_recommendations.append({
+                    "category_name": cat_name,
+                    "fundamental_papers": fundamental_papers,
+                    "trend_papers": trend_papers
+                })
+
+            return JsonResponse({"results": all_recommendations})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
