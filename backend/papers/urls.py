@@ -15,6 +15,7 @@ from .views import (
     track_paper_action,
     trend_topics,
     trend_papers,
+    recommendation_list
 )
 
 urlpatterns = [
@@ -38,4 +39,5 @@ urlpatterns = [
     path("guests/<int:guest_id>/", guest_profile),
     path("guests/<int:guest_id>/update/", update_guest),
     path("favorites/status/", update_favorite_status),
+    path('recommendations/', recommendation_list, name='recommendations'),
 ]
