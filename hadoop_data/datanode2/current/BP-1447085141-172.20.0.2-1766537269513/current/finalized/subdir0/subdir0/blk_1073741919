@@ -1,2 +1,0 @@
-v1
-{"path":"hdfs://namenode:9000/data/events/paper_events/dt=2025-12-24/hour=02/part-00000-57ac6620-d4ba-4434-bb9d-5917f699bcae.c000.snappy.parquet","size":2738,"isDir":false,"modificationTime":1766543304625,"blockReplication":1,"blockSize":134217728,"action":"add"}

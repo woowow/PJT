@@ -1,251 +1,154 @@
 <template>
   <div class="recommend-page">
+    <header class="theme-header">
+      <p class="user-greeting">✨ {{ userName }}님의 활동 기반 맞춤형 인텔리전스 추천</p>
+      <h1 class="selected-theme-title">{{ selectedTopic }}</h1>
+    </header>
 
-    <!-- ------------------------------------- -->
-    <!-- (0) 관심있는 주제 기반 추천 (MyPage에서 이동) -->
-    <!-- ------------------------------------- -->
-    <section class="interest-wrapper">
-      <h2 class="interest-title">관심있는 주제 기반 추천</h2>
-      <div class="interest-desc">
-        아래 관심 Topic 필터를 기준으로 추천을 제공할 예정입니다.
-      </div>
-
-      <div class="empty-box">
-        🚧 추천 기능은 추후 구현 예정입니다.
-      </div>
-    </section>
-
-    <!-- ------------------------------------- -->
-    <!-- (1) 사용자 관심 Topic 태그 필터 영역 -->
-    <!-- ------------------------------------- -->
-    <div class="topic-filter">
+    <nav class="topic-navigation">
       <button
         v-for="t in interestTopics"
         :key="t"
-        class="topic-btn"
+        class="nav-topic-btn"
         :class="{ active: selectedTopic === t }"
         @click="selectedTopic = t"
       >
-        {{ t }}
+        # {{ t }}
       </button>
+    </nav>
+
+    <div v-if="!loading" class="recommend-container">
+      <section class="rec-section">
+        <h2 class="section-title">📚 <span>{{ selectedTopic }}</span> 분야의 기본기를 다지고 싶다면?</h2>
+        <div class="card-grid">
+          <PaperCard v-for="p in displayedFundamental" :key="p.id" :paper="p" />
+        </div>
+      </section>
+
+      <section class="rec-section">
+        <h2 class="section-title">🔥 <span>{{ selectedTopic }}</span> 분야의 최신 연구 트렌드를 파악하고 싶다면?</h2>
+        <div class="card-grid">
+          <PaperCard v-for="p in displayedTrend" :key="p.id" :paper="p" />
+        </div>
+      </section>
     </div>
-
-    <!-- ------------------------------------- -->
-    <!-- (2) 즐겨찾기 기반 추천 섹션 -->
-    <!-- ------------------------------------- -->
-    <section class="recommend-wrapper">
-      <h2 class="recommend-title">
-        이런 논문은 어때요?:
-      </h2>
-
-      <div class="recommend-cards">
-        <PaperCard
-          v-for="p in bookmarkBasedPapers"
-          :key="p.id"
-          :paper="p"
-        />
-      </div>
-    </section>
-
-    <!-- ------------------------------------- -->
-    <!-- (3) 카테고리별 추천 섹션 (Interest) -->
-    <!-- ------------------------------------- -->
-    <section
-      v-for="category in categoryRecommend"
-      :key="category.name"
-      class="category-section"
-    >
-      <div class="category-header">
-        <h3>{{ category.name }}</h3>
-        <span class="see-more">More ></span>
-      </div>
-
-      <div class="category-carousel">
-        <PaperCard
-          v-for="p in category.papers"
-          :key="p.id"
-          :paper="p"
-        />
-      </div>
-    </section>
-
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
+import axios from "axios";
 import PaperCard from "@/components/PaperCard.vue";
 
-/* 관심 Topic */
-const interestTopics = ref(["AI", "Data Science", "BioHealth"]);
-const selectedTopic = ref("AI");
+const loading = ref(true);
+const userName = ref("사용자"); // ✅ 실시간 이름 저장 변수
+const allData = ref([]);
+const interestTopics = ref([]);
+const selectedTopic = ref("");
+const displayedFundamental = ref([]);
+const displayedTrend = ref([]);
 
-/* 즐겨찾기 기반 추천 */
-const bookmarkBasedPapers = ref([
-  {
-    id: 11,
-    title: "Neural Network Optimization Strategies",
-    author: "Kim",
-    year: 2023,
-    citation: 32,
-    institution: "MIT",
-  },
-  {
-    id: 12,
-    title: "Deep Reinforcement Learning Guide",
-    author: "Lee",
-    year: 2024,
-    citation: 80,
-    institution: "Stanford",
-  },
-  {
-    id: 13,
-    title: "Efficient Transformer Models",
-    author: "Park",
-    year: 2023,
-    citation: 55,
-    institution: "KAIST",
-  },
-]);
+/**
+ * 1. 유저 정보 및 관심사 조회 (이름 포함)
+ */
+const fetchUserInfo = async () => {
+  try {
+    const guestId = localStorage.getItem("guest_id") || 3;
+    const response = await axios.get(`http://localhost:8000/api/guests/${guestId}/`);
+    
+    // 🔍 확인: 백엔드는 'guestname'이라는 키로 이름을 보내줍니다.
+    // response.data.guestname을 userName.value에 대입합니다.
+    if (response.data.guestname) {
+      userName.value = response.data.guestname;
+    } else {
+      userName.value = "방문객";
+    }
+    
+    // 관심사 데이터 연동 (동일)
+    const topics = [];
+    if (response.data.interest_1) topics.push(response.data.interest_1);
+    if (response.data.interest_2) topics.push(response.data.interest_2);
+    if (response.data.interest_3) topics.push(response.data.interest_3);
+    
+    interestTopics.value = topics;
+    
+    // 만약 추천 목록 호출 전이라면 여기서 첫 번째 주제를 설정해줍니다.
+    if (topics.length > 0 && !selectedTopic.value) {
+      selectedTopic.value = topics[0];
+    }
 
-/* 카테고리별 추천 */
-const categoryRecommend = ref([
-  {
-    name: "AI Research",
-    papers: [
-      { id: 21, title: "GAN Innovations", author: "Choi", year: 2022, citation: 120, institution: "MIT" },
-      { id: 22, title: "Vision Transformer Study", author: "Han", year: 2023, citation: 88, institution: "Harvard" },
-      { id: 23, title: "RL with PPO & SAC", author: "Min", year: 2021, citation: 77, institution: "UC Berkeley" },
-    ]
-  },
-  {
-    name: "Data Engineering",
-    papers: [
-      { id: 31, title: "Distributed Databases", author: "Lee", year: 2023, citation: 66, institution: "CMU" },
-      { id: 32, title: "Kafka Stream Processing", author: "Park", year: 2024, citation: 40, institution: "Google" },
-      { id: 33, title: "Large-Scale ETL", author: "Kim", year: 2023, citation: 55, institution: "KAIST" },
-    ]
-  },
-  {
-    name: "Bio & Health",
-    papers: [
-      { id: 41, title: "Genomic Pattern Analysis", author: "Jung", year: 2023, citation: 90, institution: "Oxford" },
-      { id: 42, title: "Cancer Cell Detection AI", author: "Seo", year: 2024, citation: 48, institution: "Harvard" },
-    ]
-  },
-]);
+  } catch (error) {
+    console.error("유저 정보 로드 실패:", error);
+    userName.value = "방문객";
+  }
+};
+
+/**
+ * 2. 추천 논문 데이터 가져오기 (5+5 로직)
+ */
+const fetchRecommendations = async () => {
+  try {
+    const guestId = localStorage.getItem("guest_id") || 3;
+    const res = await axios.get(`http://localhost:8000/api/recommendations/`, { params: { guest_id: guestId } });
+    if (res.data.results) {
+      allData.value = res.data.results;
+      if (!selectedTopic.value) {
+        selectedTopic.value = allData.value[0].category_name;
+      }
+      updateUI();
+    }
+  } catch (e) { console.error(e); } finally { loading.value = false; }
+};
+
+const updateUI = () => {
+  const data = allData.value.find(d => d.category_name === selectedTopic.value);
+  if (data) {
+    const mapPaper = p => ({
+      id: p.paper_id, title: p.title, author: p.author_name || "저자 미상",
+      year: p.announcement_date ? new Date(p.announcement_date).getFullYear() : "N/A", 
+      citation: p.citation
+    });
+    displayedFundamental.value = data.fundamental_papers.map(mapPaper);
+    displayedTrend.value = data.trend_papers.map(mapPaper);
+  }
+};
+
+watch(selectedTopic, updateUI);
+onMounted(() => {
+  fetchUserInfo();
+  fetchRecommendations();
+});
 </script>
 
 <style scoped>
-/* 전체 페이지 */
-.recommend-page {
-  width: 100%;
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 0;
-}
+/* 📌 전체 페이지 폭 제한 (가로로 너무 길어지지 않게) */
+.recommend-page { width: 100%; max-width: 1000px; margin: auto; padding: 60px 20px; }
 
-/* (0) 관심있는 주제 기반 추천 (이동된 영역) */
-.interest-wrapper {
-  background: white;
-  padding: 26px;
-  border-radius: 14px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
+/* 📌 헤더: 문구(상) 주제(하) 및 크기 조정 */
+.theme-header { text-align: center; margin-bottom: 40px; }
+.user-greeting { font-size: 18px; color: #666; margin-bottom: 8px; font-weight: 500; }
+.selected-theme-title { font-size: 56px; font-weight: 900; color: #000; letter-spacing: -2px; }
 
-.interest-title {
-  font-size: 20px;
-  font-weight: 800;
-  margin-bottom: 8px;
+/* 📌 주제 필터 버튼 */
+.topic-navigation { display: flex; justify-content: center; gap: 12px; margin-bottom: 60px; }
+.nav-topic-btn { 
+  padding: 10px 20px; border-radius: 25px; border: 1px solid #ddd; background: #fff;
+  cursor: pointer; font-weight: 600; transition: all 0.3s;
 }
+.nav-topic-btn.active { background: #000; color: #fff; transform: scale(1.05); }
 
-.interest-desc {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 14px;
-}
-
-.empty-box {
-  background: #f8fafc;
-  padding: 18px;
-  border-radius: 12px;
-  text-align: center;
-  color: #777;
-  font-size: 14px;
-}
-
-/* ------------------------ */
-/*     Interest Topics      */
-/* ------------------------ */
-.topic-filter {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 25px;
-}
-
-.topic-btn {
-  padding: 8px 18px;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.topic-btn.active {
-  background: black;
-  color: white;
-}
-
-/* -------------------------------------------- */
-/*  (2) 즐겨찾기 추천 박스 */
-/* -------------------------------------------- */
-.recommend-wrapper {
-  background: #f8f6ef;
-  padding: 28px;
-  border-radius: 14px;
-  margin-bottom: 50px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.recommend-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.recommend-cards {
-  display: flex;
+/* 📌 카드 레이아웃: 가로 스크롤 제거 후 2열/3열 그리드 (세로 방향) */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 화면 너비에 맞춰 자동 조절 */
   gap: 20px;
+  padding: 10px 0;
 }
 
-/* ------------------------ */
-/* (3) 카테고리 추천 섹션 */
-/* ------------------------ */
-.category-section {
-  margin-top: 50px;
-}
+.rec-section { margin-bottom: 80px; }
+.section-title { font-size: 22px; font-weight: 700; margin-bottom: 25px; line-height: 1.4; }
+.section-title span { color: #2563eb; text-decoration: underline; text-underline-offset: 4px; }
 
-.category-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.category-header h3 {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.see-more {
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-}
-
-.category-carousel {
-  display: flex;
-  gap: 18px;
-}
+/* PaperCard 내부는 컴포넌트 내부 스타일을 따르므로, 
+   이곳의 그리드 설정만으로도 논문들이 세로로 쌓이게 됩니다. */
 </style>
