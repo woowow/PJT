@@ -12,7 +12,7 @@ CHECKPOINT = os.getenv("CHECKPOINT", f"{HDFS_BASE}/data/checkpoints/paper_events
 
 schema = StructType([
     StructField("event_id", StringType(), True),
-    StructField("ts", StringType(), True),          # ISO string
+    StructField("ts", StringType(), True),
     StructField("guest_id", IntegerType(), True),
     StructField("paper_id", IntegerType(), True),
     StructField("action", StringType(), True),
@@ -23,7 +23,6 @@ def main():
     spark = (
         SparkSession.builder
         .appName("kafka-to-hdfs-paper-events")
-        # 로컬 테스트 편의 (운영이면 제거 가능)
         .config("spark.sql.shuffle.partitions", "8")
         .getOrCreate()
     )
@@ -43,10 +42,9 @@ def main():
 
     parsed = value_df.select(from_json(col("json_str"), schema).alias("e")).select("e.*")
 
-    # ts -> timestamp 변환(파싱 실패해도 null)
+    # ts -> timestamp 변환
     with_ts = parsed.withColumn("event_ts", to_timestamp(col("ts")))
 
-    # 파티션 컬럼 생성 (event_ts가 null이면 dt/hour가 null -> 그 행은 별도 디렉토리에 쌓일 수 있음)
     out = (
         with_ts
         .withColumn("dt", to_date(col("event_ts")))

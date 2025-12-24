@@ -12,3 +12,4 @@ elasticsearch==8.12.1
 
 
 kafka-python==2.0.2
+openai

@@ -9,11 +9,17 @@ from psycopg2 import sql as psql
 from .services.kafka_producer import publish_user_event
 from django.conf import settings
 
+# ✅ Chatbot
+import re
+from openai import OpenAI
+
+
 def _use_stream_tracking() -> bool:
     """
     요청 시점에 settings를 읽어서 결정(캐시/재시작/빌드 꼬임 디버깅 쉬움)
     """
     return bool(getattr(settings, "USE_STREAM_TRACKING", False))
+
 
 logger = logging.getLogger(__name__)
 
@@ -383,21 +389,17 @@ def track_paper_action(request, paper_id):
     except (TypeError, ValueError):
         return JsonResponse({"error": "guest_id must be integer"}, status=400)
 
-    # ✅ DB 집계는 하지 않음 (Flink가 담당)
-    # (paper_id 유효성만 체크하고 싶으면 여기서 SELECT만 한번 해도 됨)
     with connection.cursor() as cursor:
         cursor.execute("SELECT 1 FROM paper WHERE paper_id=%s", [paper_id])
         if not cursor.fetchone():
             return JsonResponse({"error": "paper not found"}, status=404)
 
-    # ✅ Kafka 이벤트 발행(실패해도 API는 성공)
     try:
         publish_user_event(guest_id_int, paper_id, "VIEW_DETAIL", meta={"source": "web"})
     except Exception:
         logger.exception("Kafka publish failed (VIEW_DETAIL) guest_id=%s paper_id=%s", guest_id_int, paper_id)
 
     return JsonResponse({"ok": True})
-
 
 
 # ======================
@@ -446,16 +448,12 @@ def toggle_favorite(request):
                 """, [guest_id_int, paper_id_int])
                 action = "FAVORITE_ADD"
 
-    # ✅ DB 집계는 하지 않음 (Flink가 담당)
-    # ✅ Kafka 이벤트 발행
     try:
         publish_user_event(guest_id_int, paper_id_int, action, meta={"source": "web"})
     except Exception:
         logger.exception("Kafka publish failed (%s) guest_id=%s paper_id=%s", action, guest_id_int, paper_id_int)
 
     return JsonResponse({"favorited": (action == "FAVORITE_ADD")})
-
-
 
 
 def favorite_list(request, guest_id):
@@ -820,10 +818,6 @@ def trend_papers(request):
     return JsonResponse(papers, safe=False)
 
 
-# backend/papers/views.py
-
-# backend/papers/views.py
-
 def recommendation_list(request):
     guest_id = request.GET.get('guest_id')
     if not guest_id:
@@ -831,7 +825,6 @@ def recommendation_list(request):
 
     try:
         with connection.cursor() as cursor:
-            # 1. 상위 3개 카테고리 추출
             cursor.execute("""
                 SELECT gcc.category_id, c.category_name 
                 FROM guestcategorycount gcc
@@ -847,7 +840,6 @@ def recommendation_list(request):
             all_recommendations = []
 
             for cat_id, cat_name in top_categories:
-                # ✅ 섹션 1: 해당 분야 기본기 (인용수 상위 5개)
                 cursor.execute("""
                     SELECT p.paper_id, p.title, p.citation, p.announcement_date, 
                            MAX(a.author_name) as author_name, 'FUNDAMENTAL' as type
@@ -860,8 +852,6 @@ def recommendation_list(request):
                 """, [cat_id])
                 fundamental_papers = dictfetchall(cursor)
 
-                # ✅ 섹션 2: 최신 연구 트렌드 (인용 1회 이상 최신순 5개, 중복 제거)
-                # 위에서 뽑힌 5개 논문 ID를 제외합니다.
                 fundamental_ids = [p['paper_id'] for p in fundamental_papers]
                 
                 cursor.execute("""
@@ -886,4 +876,258 @@ def recommendation_list(request):
 
             return JsonResponse({"results": all_recommendations})
     except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+# ============================================================
+# ✅ Chatbot API (NEW)
+# ============================================================
+
+def _looks_like_trend_question(text: str) -> bool:
+    t = (text or "").lower()
+    keywords = ["트렌드", "weekly", "hot", "인기", "top", "주간", "요즘"]
+    return any(k in t for k in keywords)
+
+def _extract_paper_id_hint(text: str):
+    if not text:
+        return None
+    if ("논문" in text) or ("paper" in text.lower()) or ("#" in text):
+        m = re.search(r"(?:논문|paper|#)\s*([0-9]{1,7})", text, re.IGNORECASE)
+        if m:
+            return _safe_int(m.group(1))
+    return None
+
+def _fetch_weekly_top(cursor, limit=10):
+    if not _paper_has_weekly_count(cursor):
+        return []
+    cursor.execute("""
+        SELECT
+            p.paper_id AS id,
+            p.title,
+            EXTRACT(YEAR FROM p.announcement_date) AS year,
+            p.citation,
+            c.category_name AS subject,
+            p.weekly_count
+        FROM paper p
+        LEFT JOIN category c ON p.category_id = c.category_id
+        ORDER BY p.weekly_count DESC, p.paper_id DESC
+        LIMIT %s
+    """, [limit])
+    return dictfetchall(cursor)
+
+def _fetch_guest_favorites(cursor, guest_id: int, limit=5):
+    cursor.execute("""
+        SELECT
+            p.paper_id AS id,
+            p.title,
+            EXTRACT(YEAR FROM p.announcement_date) AS year,
+            p.citation
+        FROM guestfavorite gf
+        JOIN paper p ON gf.paper_id = p.paper_id
+        WHERE gf.guest_id = %s
+        ORDER BY p.announcement_date DESC
+        LIMIT %s
+    """, [guest_id, limit])
+    return dictfetchall(cursor)
+
+def _fetch_guest_top_topics(cursor, guest_id: int, limit=3):
+    try:
+        counter_col = _get_gcc_counter_column(cursor)
+    except Exception:
+        counter_col = None
+    if not counter_col:
+        return []
+    q = psql.SQL("""
+        SELECT
+            c.category_name,
+            gcc.{col} AS cnt
+        FROM guestcategorycount gcc
+        JOIN category c ON gcc.category_id = c.category_id
+        WHERE gcc.guest_id = %s
+        ORDER BY gcc.{col} DESC, c.category_name ASC
+        LIMIT %s
+    """).format(col=psql.Identifier(counter_col))
+    cursor.execute(q, [guest_id, limit])
+    rows = cursor.fetchall()
+    return [{"category_name": r[0], "cnt": r[1]} for r in rows]
+
+def _fetch_paper_brief(cursor, paper_id: int):
+    cursor.execute("""
+        SELECT
+            p.paper_id AS id,
+            p.title,
+            EXTRACT(YEAR FROM p.announcement_date) AS year,
+            p.citation,
+            i.institution_name AS institution,
+            c.category_name AS subject
+        FROM paper p
+        LEFT JOIN institution i ON p.institution_id = i.institution_id
+        LEFT JOIN category c ON p.category_id = c.category_id
+        WHERE p.paper_id = %s
+    """, [paper_id])
+    row = cursor.fetchone()
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "title": row[1],
+        "year": int(row[2]) if row[2] else None,
+        "citation": row[3],
+        "institution": row[4],
+        "subject": row[5],
+    }
+
+def _extract_response_text(resp) -> str:
+    try:
+        out_text = getattr(resp, "output_text", None)
+        if out_text:
+            return out_text
+    except Exception:
+        pass
+
+    try:
+        texts = []
+        for item in getattr(resp, "output", []) or []:
+            if getattr(item, "type", None) == "message":
+                for c in getattr(item, "content", []) or []:
+                    t = getattr(c, "text", None)
+                    if t:
+                        texts.append(t)
+        if texts:
+            return "\n".join(texts).strip()
+    except Exception:
+        pass
+
+    return ""
+
+@csrf_exempt
+def chatbot(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    try:
+        body = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        body = {}
+
+    message = (body.get("message") or "").strip()
+    guest_id = body.get("guest_id")
+    history = body.get("history") or []
+
+    if not message:
+        return JsonResponse({"error": "message required"}, status=400)
+
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    base_url = os.getenv("OPENAI_BASE_URL", "").strip() or None  # ✅ 핵심 (GMS)
+    model = os.getenv("OPENAI_MODEL", "gpt-4.1").strip()
+
+    try:
+        temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.3"))
+    except ValueError:
+        temperature = 0.3
+    try:
+        max_out = int(os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "700"))
+    except ValueError:
+        max_out = 700
+
+    if not api_key or "PUT_YOUR_GMS_KEY_HERE" in api_key:
+        return JsonResponse({"error": "OPENAI_API_KEY(GMS_KEY)가 backend/.env에 설정되어야 합니다."}, status=500)
+
+    ctx_lines = []
+    meta_used = []
+
+    paper_id_hint = _extract_paper_id_hint(message)
+
+    with connection.cursor() as cursor:
+        if paper_id_hint is not None:
+            p = _fetch_paper_brief(cursor, paper_id_hint)
+            if p:
+                ctx_lines.append("[선택 논문 요약]")
+                ctx_lines.append(
+                    f"- id={p['id']} | {p['title']} ({p.get('year')}) | citation={p.get('citation')} | subject={p.get('subject')} | inst={p.get('institution')}"
+                )
+                meta_used.append("paper_brief")
+            else:
+                ctx_lines.append("[선택 논문 요약]")
+                ctx_lines.append(f"- id={paper_id_hint} 는 DB에서 찾지 못했습니다.")
+                meta_used.append("paper_brief_missing")
+
+        if _looks_like_trend_question(message):
+            top = _fetch_weekly_top(cursor, limit=10)
+            if top:
+                ctx_lines.append("[주간 트렌드(weekly_count) TOP 10]")
+                for r in top:
+                    ctx_lines.append(
+                        f"- id={r['id']} | weekly={r.get('weekly_count')} | {r.get('title')} ({r.get('year')}) | citation={r.get('citation')} | subject={r.get('subject')}"
+                    )
+                meta_used.append("weekly_top")
+
+        guest_id_int = None
+        if guest_id is not None:
+            try:
+                guest_id_int = int(guest_id)
+            except (TypeError, ValueError):
+                guest_id_int = None
+
+        if guest_id_int is not None:
+            top_topics = _fetch_guest_top_topics(cursor, guest_id_int, limit=3)
+            if top_topics:
+                ctx_lines.append("[사용자 관심 주제 TOP 3(누적)]")
+                for t in top_topics:
+                    ctx_lines.append(f"- {t['category_name']} (cnt={t['cnt']})")
+                meta_used.append("guest_top_topics")
+
+            fav = _fetch_guest_favorites(cursor, guest_id_int, limit=5)
+            if fav:
+                ctx_lines.append("[사용자 즐겨찾기 최근 5개]")
+                for r in fav:
+                    ctx_lines.append(f"- id={r['id']} | {r.get('title')} ({r.get('year')}) | citation={r.get('citation')}")
+                meta_used.append("guest_favorites")
+
+    context = "\n".join(ctx_lines).strip()
+
+    instructions = (
+        "너는 'Archivinator' 논문 검색/추천 웹서비스의 챗봇이다.\n"
+        "- 답변은 한국어로, 짧고 명확하게.\n"
+        "- 아래 [Context]에 없는 논문 세부정보는 지어내지 말 것.\n"
+        "- 사용자가 '트렌드/인기/weekly'를 물으면 weekly_count 기준으로 정리.\n"
+        "- 사용자가 '추천'을 물으면 사용자 관심주제/즐겨찾기(있다면)를 근거로 제안.\n"
+        "- 답변에 논문을 제시할 때는 가능하면 paper_id를 함께 적어라.\n"
+        "- 불확실하면 불확실하다고 말하고, 어떤 정보를 더 보면 좋은지 안내.\n"
+    )
+
+    llm_input = []
+    if history and isinstance(history, list):
+        trimmed = history[-10:]
+        lines = []
+        for h in trimmed:
+            role = (h.get("role") or "").strip()
+            content = (h.get("content") or "").strip()
+            if role in ("user", "assistant") and content:
+                lines.append(f"{role.upper()}: {content}")
+        if lines:
+            llm_input.append("[ChatHistory]\n" + "\n".join(lines))
+
+    if context:
+        llm_input.append("[Context]\n" + context)
+
+    llm_input.append("[User]\n" + message)
+    final_input = "\n\n".join(llm_input).strip()
+
+    try:
+        client = OpenAI(api_key=api_key, base_url=base_url)
+
+        resp = client.responses.create(
+            model=model,
+            instructions=instructions,
+            input=final_input,
+            temperature=temperature,
+            max_output_tokens=max_out,
+        )
+        reply = _extract_response_text(resp) or ""
+        if not reply.strip():
+            reply = "답변 생성에 실패했습니다. (빈 응답) 다시 시도해 주세요."
+        return JsonResponse({"reply": reply, "meta": {"model": model, "used_context": meta_used, "base_url": base_url}})
+    except Exception as e:
+        logger.exception("Chatbot error")
         return JsonResponse({"error": str(e)}, status=500)

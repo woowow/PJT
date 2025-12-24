@@ -15,6 +15,9 @@ import AuthorView from "@/views/AuthorView.vue";
 import RecommendView from "@/views/RecommendView.vue";
 import TrendView from "@/views/TrendView.vue";
 
+// ✅ Chatbot
+import ChatbotView from "@/views/ChatbotView.vue";
+
 // ❌ 제거: 연구 활동 라우트용 View
 // import ActivityCalendarView from "@/views/ActivityCalendarView.vue";
 // import ReadingBoardView from "@/views/ReadingBoardView.vue";
@@ -82,6 +85,13 @@ const router = createRouter({
           path: "trend",
           name: "trend",
           component: TrendView,
+        },
+
+        // ✅ Chatbot
+        {
+          path: "chat",
+          name: "chat",
+          component: ChatbotView,
         },
 
         // ❌ 제거: 연구달력/연구현황 라우트

@@ -9,16 +9,6 @@
     <value>mapreduce_shuffle</value>
   </property>
 
-  <!-- <property>
-    <name>yarn.resourcemanager.scheduler.class</name>
-    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fifo.FifoScheduler</value>
-  </property> -->
-
-  <!-- <property>
-    <name>yarn.resourcemanager.scheduler.class</name>
-    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
-  </property> -->
-
   <property>
     <name>yarn.resourcemanager.scheduler.class</name>
     <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler</value>

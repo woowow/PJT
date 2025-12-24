@@ -15,7 +15,8 @@ from .views import (
     track_paper_action,
     trend_topics,
     trend_papers,
-    recommendation_list
+    recommendation_list,
+    chatbot,  # ✅ NEW
 )
 
 urlpatterns = [
@@ -40,4 +41,7 @@ urlpatterns = [
     path("guests/<int:guest_id>/update/", update_guest),
     path("favorites/status/", update_favorite_status),
     path('recommendations/', recommendation_list, name='recommendations'),
+
+    # ✅ Chatbot API
+    path("chatbot/", chatbot),
 ]

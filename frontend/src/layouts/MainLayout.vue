@@ -13,6 +13,7 @@
       <nav class="nav-center">
         <router-link to="/trend" class="nav-item">트렌드</router-link>
         <router-link to="/recommend" class="nav-item">추천</router-link>
+        <router-link to="/chat" class="nav-item">아카이브네이터</router-link>
         <router-link to="/mypage" class="nav-item">마이페이지</router-link>
       </nav>
 
@@ -116,7 +117,7 @@ const logout = () => {
 .nav-center {
   display: flex;
   justify-content: center;
-  gap: 120px; /* 메뉴 3개라 기존 150px는 너무 넓을 수 있어 적당히 조정 */
+  gap: 80px;
   flex-grow: 1;
 }
 
